@@ -40,20 +40,23 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Check if staff
-    let isStaff = false;
-    const checkStaff = await db.query(`
-      SELECT DISTINCT u.ID, u.username, u.email
-      FROM users u
-      JOIN user_role ur ON u.ID = ur.user_ID
-      JOIN role r ON ur.role_ID = r.ID
-      WHERE r.name NOT IN ('Member', 'Supporter')
-      AND u.email = $1`,
+    // Retrieve user role
+    const userRoleQuery = await db.query(`
+      SELECT r.name FROM users u
+      JOIN user_role ur ON u.id = ur.user_ID
+      JOIN role r ON ur.role_id = r.id
+      WHERE u.email = $1`,
       [email]);
     
-    if (checkStaff.rows.length > 0) {
-      isStaff = true;
+    let role = []
+    if (userRoleQuery.rows.length > 0) {
+      role = userRoleQuery.rows.map(role => role.name);
     }
+    
+    // Check if staff
+    let isStaff = false;
+    const staffRoles = ["Founder", "Admin", "Typesetter", "Translator", "Quality Control", "Cleaner", "Redrawer"]
+    isStaff = role.some(r => staffRoles.includes(r))
 
     // ---- Login Successfull, return user data
     // JWT
@@ -61,7 +64,8 @@ export default defineEventHandler(async (event) => {
       id: users.id,
       username: users.username,
       email: users.email,
-      staff: isStaff
+      staff: isStaff,
+      role: role,
     }
     const JWT_SECRET = process.env.JWT_SECRET || `secretgoeshere,butthisshouldbechanged>:(`;
     const token = jwt.sign(payload, JWT_SECRET, {
@@ -74,7 +78,6 @@ export default defineEventHandler(async (event) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 3, // 3 days
-      
     })
 
     // ---- Success
