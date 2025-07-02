@@ -194,3 +194,6 @@ FOR EACH ROW
 EXECUTE FUNCTION add_member_role_on_new_user();
 
 -- End of file.
+
+-- STORED PROCEDURES
+-- Retrieving Manga
