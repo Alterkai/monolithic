@@ -5,16 +5,16 @@
     <UForm :schema="schema" :state="state" @submit="onSubmit" class="flex flex-col gap-2 w-[20rem]">
       <h1 class="font-bold text-2xl mb-2">Register</h1>
 
+      <UFormField label="Email" name="email">
+        <UInput class="w-full" v-model="state.email" />
+      </UFormField>
+
       <UFormField label="Name" name="name">
         <UInput class="w-full" v-model="state.name" />
       </UFormField>
 
       <UFormField label="Username" name="username">
         <UInput class="w-full" v-model="state.username" />
-      </UFormField>
-
-      <UFormField label="Email" name="email">
-        <UInput class="w-full" v-model="state.email" />
       </UFormField>
 
       <UFormField label="Password" name="password">
