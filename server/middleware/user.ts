@@ -4,6 +4,11 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
   const url = event.node.req.url;
 
+  // Allow auth
+  if (url && url.startsWith('/api/auth')) {
+    return;
+  }
+
   // Check every POST request
   // Only logged in users may POST, including comments
   if (method === 'POST') {

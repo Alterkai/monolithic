@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+.container {
+  width: 100%; /* Default 100% lebar */
+  padding-left: 15px; /* Padding default untuk mobile */
+  padding-right: 15px; /* Padding default untuk mobile */
+  margin-left: auto;   /* Memusatkan container */
+  margin-right: auto;  /* Memusatkan container */
+}
+
+/* Small devices (phones, 576px and up) */
+@media (min-width: 576px) {
+  .container {
+      max-width: 540px; /* Lebar tetap untuk breakpoint ini */
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .container {
+      max-width: 720px; /* Lebar tetap untuk breakpoint ini */
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .container {
+      max-width: 960px; /* Lebar tetap untuk breakpoint ini */
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .container {
+      max-width: 1140px; /* Lebar tetap untuk breakpoint ini */
+  }
+}
+
+/* Extra extra large devices (larger desktops, 1400px and up - Bootstrap 5 default) */
+@media (min-width: 1400px) {
+  .container {
+      max-width: 1320px; /* Lebar tetap untuk breakpoint ini */
+  }
+}
