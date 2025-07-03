@@ -31,7 +31,21 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth';
 import * as z from 'zod';
+
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  user: {
+    id: number;
+    username: string;
+    isStaff: boolean;
+    roles: string[];
+  };
+}
+
+const authStore = useAuthStore();
 const show = ref(false);
 const isLoading = ref(false);
 const toast = useToast();
@@ -53,13 +67,17 @@ const state = reactive<Partial<Schema>>({
 async function onSubmit() {
   try {
     isLoading.value = true;
-    await $fetch('/api/auth/login', {
+    const response = await $fetch<LoginResponse>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(state),
       headers: {
         'Content-Type': 'application/json'
       }
     });
+
+    if (response && response.user) {
+      authStore.setUser(response.user);
+    }
   } catch (error) {
     toast.add({
       title: 'Login Failed',
@@ -74,6 +92,4 @@ async function onSubmit() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

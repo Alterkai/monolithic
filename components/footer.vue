@@ -15,7 +15,7 @@
       <div class="flex flex-row gap-20">
         <!-- LINKS -->
         <div class="flex flex-col">
-          <h2 class="font-semibold text-xl">Links</h2>
+          <h2 class="font-semibold text-xl mb-2">Links</h2>
           <ULink to="/">Home</ULink>
           <ULink to="/manga">Manga</ULink>
           <ULink to="/blog">Blog</ULink>
@@ -24,7 +24,7 @@
 
         <!-- SOCIALS -->
         <div class="flex flex-col">
-          <h2 class="font-semibold text-xl">Socials</h2>
+          <h2 class="font-semibold text-xl mb-2">Socials</h2>
           <ULink to="https://trakteer.id/faralha" target="_blank">Trakteer</ULink>
           <ULink to="https://facebook.com/alterkaiscans">Facebook</ULink>
           <ULink to="https://bit.ly/alterkai" target="_blank">Discord</ULink>
@@ -32,7 +32,7 @@
 
         <!-- LEGALS -->
          <div class="flex flex-col">
-          <h2 class="font-semibold text-xl">Legal</h2>
+          <h2 class="font-semibold text-xl mb-2">Legal</h2>
           <ULink to="/terms">Terms of Service</ULink>
           <ULink to="/privacy">Privacy Policy</ULink>
           <ULink to="/dmca">DMCA</ULink>

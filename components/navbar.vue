@@ -1,0 +1,139 @@
+<template>
+  <nav class="flex flex-row justify-between container py-5">
+    <NuxtLink to="/" class="font-bold text-2xl">Alterkai</NuxtLink>
+
+    <div class="flex items-center gap-4">
+
+      <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center'}">
+        <!-- BUTTON -->
+        <UButton icon="i-lucide-search" variant="outline" color="neutral" class="min-w-[10rem]">Search...</UButton>
+
+        <!-- SEARCH CONTENT -->
+        <template #content>
+          <div class="p-4">
+            <UInput v-model="search" icon="i-lucide-search" placeholder="Search" class="w-full"></UInput>
+            
+            <!-- SEARCH RESULTS -->
+            <div v-if="search.length > 0" class="mt-2">
+              <p class="text-sm text-gray-500">Search results for "{{ search }}"</p>
+              
+              <div v-for="result in searchResults"
+                class="cursor-pointer"
+                :key="result.id"
+                @click="handleMangaClick()"
+              >
+                <Mangacard :title="result.title"
+                  :description="result.description"
+                  :image="result.cover"
+                  :id="result.id"
+                  />
+              </div>
+            </div>
+          </div>
+        </template>
+      </UModal>
+
+      <ULink v-if="authStore.isLoggedIn == false" to="/login">
+        <UButton icon="i-lucide-log-in" variant="subtle">
+          Login
+        </UButton>
+      </ULink>
+      <UDropdownMenu v-else :items="items" :content="{ side: 'bottom', align: 'end' }" :ui="{ content: 'wd-48' }">
+        <UAvatar icon="i-lucide-image" size="xl" :src="authStore.user?.avatar"
+          class="cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all" />
+      </UDropdownMenu>
+    </div>
+  </nav>
+</template>
+
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/auth';
+import type { DropdownMenuItem } from '@nuxt/ui';
+import { debounce } from '@/server/utils/debounce'
+
+interface SearchMangaResult {
+  title: string;
+  description: string;
+  cover: string;
+  id: number;
+}
+
+const modalOpen = ref(false);
+const searchResults = ref<SearchMangaResult[]>([]);
+const search = ref('');
+const authStore = useAuthStore();
+const items = computed<DropdownMenuItem[][]>(() => [
+  [
+    {
+      label: authStore.user?.username || 'Guest',
+      avatar: {
+        src: authStore.user?.avatar
+      },
+      type: 'label'
+    }
+  ],
+  [
+    {
+      label: 'Profile',
+      icon: 'i-lucide-user',
+      to: '/profile',
+    },
+    {
+      label: 'Settings',
+      icon: 'i-lucide-settings',
+      to: '/settings',
+    },
+    {
+      label: 'Logout',
+      icon: 'i-lucide-log-out',
+      onSelect: logout
+    }
+  ]
+])
+
+const performSearch = async (query: string) => {
+  if (query.length < 3) {
+    return searchResults.value = [];
+  }
+
+  try {
+    const response = await $fetch<SearchMangaResult[]>(`/api/manga/?title=${encodeURIComponent(query)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Search results:', response);
+    if (response && Array.isArray(response)) {
+      searchResults.value = response;
+    } else {
+      searchResults.value = [];
+    }
+  } catch (error) {
+    
+  }
+}
+
+const debouncedSearch = debounce(performSearch, 300);
+watch(search, (newQuery) => {
+  debouncedSearch(newQuery)
+}, { immediate: false })
+
+const handleMangaClick = () => {
+  modalOpen.value = false;
+  search.value = '';
+  searchResults.value = [];
+}
+
+const logout = async () => {
+  try {
+    await authStore.logOut();
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+}
+
+onBeforeMount(() => {
+  debouncedSearch.cancel();
+})
+</script>
