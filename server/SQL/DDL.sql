@@ -195,5 +195,62 @@ EXECUTE FUNCTION add_member_role_on_new_user();
 
 -- End of file.
 
--- STORED PROCEDURES
--- Retrieving Manga
+-- VIEW: get manga with chapters
+CREATE OR REPLACE VIEW manga_with_chapters AS
+SELECT
+    m.ID AS manga_id,
+    m.title AS manga_title,
+    m.original_title AS manga_original_title,
+    m.description AS manga_description,
+    m.author AS manga_author,
+    m.cover AS manga_cover,
+    m.ratings AS manga_ratings,
+    -- Mengumpulkan detail chapter ke dalam array JSONB
+    COALESCE(
+        JSONB_AGG(
+            JSONB_BUILD_OBJECT(
+                'id', c.ID,
+                'number', c.number,
+                'name', c.name,
+                'date_added', c.date_added
+            )
+            ORDER BY c.number ASC
+        ) FILTER (WHERE c.ID IS NOT NULL), -- Filter untuk menghindari array [null] jika tidak ada chapter
+        '[]'::JSONB -- Jika tidak ada chapter sama sekali, kembalikan array kosong
+    ) AS chapters
+FROM
+    manga m
+LEFT JOIN
+    chapter c ON m.ID = c.manga_ID
+GROUP BY
+    m.ID, m.title, m.original_title, m.description, m.author, m.cover, m.ratings
+ORDER BY
+    m.ID;
+
+
+CREATE OR REPLACE VIEW chapter_with_images AS
+SELECT
+    c.ID AS chapter_id,
+    c.number AS chapter_number,
+    c.name AS chapter_name,
+    c.date_added AS chapter_date_added,
+    c.manga_ID AS chapter_manga_id,
+    COALESCE(
+        JSONB_AGG(
+            JSONB_BUILD_OBJECT(
+                'id', i.ID,
+                'page_number', i.page_number,
+                'link', i.link
+            )
+            ORDER BY i.page_number ASC 
+        ) FILTER (WHERE i.ID IS NOT NULL),
+        '[]'::JSONB 
+    ) AS images
+FROM
+    chapter c
+LEFT JOIN
+    image i ON c.ID = i.chapter_ID
+GROUP BY
+    c.ID, c.number, c.name, c.date_added, c.manga_ID
+ORDER BY
+    c.ID;
