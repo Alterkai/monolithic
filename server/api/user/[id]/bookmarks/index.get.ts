@@ -1,0 +1,1 @@
+// URL: /api/user/bookmarks

@@ -5,8 +5,9 @@ export default defineEventHandler(async (event) => {
   // Only allow access to role "Admin"
   // Already handled in middleware/admin.ts
   
+  let userID = getRouterParam(event, 'id') as string | undefined;
   const body = await readBody(event);
-  const { username, name, avatar, role, userID } = body;
+  const { username, name, avatar, role } = body;
 
   // Validate if user exists
   const userCheck = await db.query(

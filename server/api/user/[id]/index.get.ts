@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '~/types/database';
 
 export default defineEventHandler(async (event) => {
-  let id = getQuery(event).id as string | undefined;
+  let id = getRouterParam(event, 'id') as string | undefined;
   let user: User;
 
   // Get Current User Profile

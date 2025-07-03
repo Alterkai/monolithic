@@ -227,7 +227,7 @@ GROUP BY
 ORDER BY
     m.ID;
 
-
+-- VIEW: get chapter with images
 CREATE OR REPLACE VIEW chapter_with_images AS
 SELECT
     c.ID AS chapter_id,
@@ -254,3 +254,70 @@ GROUP BY
     c.ID, c.number, c.name, c.date_added, c.manga_ID
 ORDER BY
     c.ID;
+
+-- VIEW: get chapter with comments
+CREATE OR REPLACE VIEW chapter_with_comments AS
+SELECT
+    c.ID AS chapter_id,
+    c.number AS chapter_number,
+    c.name AS chapter_name,
+    c.date_added AS chapter_date_added,
+    c.manga_ID AS chapter_manga_id,
+    COALESCE(
+        JSONB_AGG(
+            JSONB_BUILD_OBJECT(
+                'id', cc.ID,
+                'comment', cc.comment,
+                'date_added', cc.date_added,
+                'user_id', cc.user_ID,
+                'user_name', u.name
+            )
+            ORDER BY cc.date_added ASC 
+        ) FILTER (WHERE cc.ID IS NOT NULL),
+        '[]'::JSONB 
+    ) AS comments
+FROM
+    chapter c
+LEFT JOIN
+    chapter_comments cc ON c.ID = cc.chapter_ID
+LEFT JOIN
+    users u ON cc.user_ID = u.ID
+GROUP BY
+    c.ID, c.number, c.name, c.date_added, c.manga_ID
+ORDER BY
+    c.ID;
+
+-- VIEW: get manga with comments
+CREATE OR REPLACE VIEW manga_with_comments AS
+SELECT
+    m.ID AS manga_id,
+    m.title AS manga_title,
+    m.original_title AS manga_original_title,
+    m.description AS manga_description,
+    m.author AS manga_author,
+    m.cover AS manga_cover,
+    m.ratings AS manga_ratings,
+    COALESCE(
+        JSONB_AGG(
+            JSONB_BUILD_OBJECT(
+                'id', mc.ID,
+                'comment', mc.comment,
+                'date_added', mc.date_added,
+                'user_id', mc.user_ID,
+                'user_name', u.name
+            )
+            ORDER BY mc.date_added ASC 
+        ) FILTER (WHERE mc.ID IS NOT NULL),
+        '[]'::JSONB 
+    ) AS comments
+FROM
+    manga m
+LEFT JOIN
+    manga_comments mc ON m.ID = mc.manga_ID
+LEFT JOIN
+    users u ON mc.user_ID = u.ID
+GROUP BY
+    m.ID, m.title, m.original_title, m.description, m.author, m.cover, m.ratings
+ORDER BY
+    m.ID;
+
