@@ -40,7 +40,8 @@ CREATE TABLE manga (
     description TEXT NOT NULL,
     author VARCHAR(50) NOT NULL,
     cover TEXT NOT NULL,
-    ratings NUMERIC(3, 1) NOT NULL DEFAULT 8.0
+    ratings NUMERIC(3, 1) NOT NULL DEFAULT 8.0,
+    CONSTRAINT uq_title UNIQUE (title)
 );
 CREATE INDEX idx_manga_title ON manga(title);
 
@@ -205,7 +206,6 @@ SELECT
     m.author AS manga_author,
     m.cover AS manga_cover,
     m.ratings AS manga_ratings,
-    -- Mengumpulkan detail chapter ke dalam array JSONB
     COALESCE(
         JSONB_AGG(
             JSONB_BUILD_OBJECT(
@@ -215,8 +215,8 @@ SELECT
                 'date_added', c.date_added
             )
             ORDER BY c.number ASC
-        ) FILTER (WHERE c.ID IS NOT NULL), -- Filter untuk menghindari array [null] jika tidak ada chapter
-        '[]'::JSONB -- Jika tidak ada chapter sama sekali, kembalikan array kosong
+        ) FILTER (WHERE c.ID IS NOT NULL),
+        '[]'::JSONB
     ) AS chapters
 FROM
     manga m
@@ -321,3 +321,28 @@ GROUP BY
 ORDER BY
     m.ID;
 
+-- FUNCTION: add manga genre
+-- This function adds a genre to a manga. If the genre does not exist, it will
+CREATE OR REPLACE FUNCTION add_manga_genre(
+    p_manga_id INT,
+    p_genre_name VARCHAR(50)
+)
+RETURNS VOID AS $$
+DECLARE
+    v_genre_id INT;
+BEGIN
+    INSERT INTO genre (name)
+    VALUES (LOWER(p_genre_name))
+    ON CONFLICT (name) DO UPDATE SET
+        name = EXCLUDED.name
+    RETURNING ID INTO v_genre_id;
+
+    INSERT INTO manga_genre (manga_ID, genre_ID)
+    VALUES (p_manga_id, v_genre_id)
+    ON CONFLICT (manga_ID, genre_ID) DO NOTHING;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Gagal menambahkan genre "%" ke manga ID %: %', p_genre_name, p_manga_id, SQLERRM;
+END;
+$$ LANGUAGE plpgsql;
