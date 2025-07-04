@@ -4,6 +4,7 @@
 
     <div class="flex items-center gap-4">
 
+      <!-- SEARCH BUTTON -->
       <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center'}">
         <!-- BUTTON -->
         <UButton icon="i-lucide-search" variant="outline" color="neutral" class="min-w-[10rem]">Search...</UButton>
@@ -12,27 +13,25 @@
         <template #content>
           <div class="p-4">
             <UInput v-model="search" icon="i-lucide-search" placeholder="Search" class="w-full"></UInput>
-            
+
             <!-- SEARCH RESULTS -->
             <div v-if="search.length > 0" class="mt-2">
               <p class="text-sm text-gray-500">Search results for "{{ search }}"</p>
-              
-              <div v-for="result in searchResults"
-                class="cursor-pointer"
-                :key="result.id"
-                @click="handleMangaClick()"
-              >
-                <Mangacard :title="result.title"
-                  :description="result.description"
-                  :image="result.cover"
-                  :id="result.id"
-                  />
+
+              <div v-for="result in searchResults" class="cursor-pointer" :key="result.id" @click="handleMangaClick()">
+                <Mangacard :title="result.title" :description="result.description" :image="result.cover"
+                  :id="result.id" />
               </div>
             </div>
           </div>
         </template>
       </UModal>
 
+      <!-- TOGGLE DARK/LIGHT MODE -->
+      <UButton :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'" color="neutral" variant="ghost"
+        @click="isDark = !isDark" />
+
+      <!-- USER AVATAR OR LOGIN BUTTON -->
       <ULink v-if="authStore.isLoggedIn == false" to="/login">
         <UButton icon="i-lucide-log-in" variant="subtle">
           Login
@@ -57,6 +56,17 @@ interface SearchMangaResult {
   cover: string;
   id: number;
 }
+
+// Color mode
+const colorMode = useColorMode();
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark';
+  },
+  set(_isDark) {
+    colorMode.preference = _isDark ? 'dark' : 'light';
+  }
+})
 
 const modalOpen = ref(false);
 const searchResults = ref<SearchMangaResult[]>([]);

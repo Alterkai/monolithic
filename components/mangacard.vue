@@ -1,10 +1,10 @@
 <template>
   <NuxtLink :to="`/manga/${id}`">
-    <div class="flex flex-row p-2 gap-2">
-      <NuxtImg :src="image" width="50" />
-      <div>
+    <div class="flex flex-row p-2 gap-2 h-[7rem] hover:outline hover:outline-primary rounded-md">
+      <NuxtImg :src="image" />
+      <div class="flex flex-col justify-start">
         <h2 class="font-semibold text-lg">{{ title }}</h2>
-        <p class="text-sm text-slate-400">{{ description }}</p>
+        <p class="text-sm text-slate-400 line-clamp-3">{{ description }}</p>
       </div>
     </div>
   </NuxtLink>
@@ -33,3 +33,10 @@ defineProps({
   }
 })
 </script>
+
+<style scoped>
+img {
+  width: auto;
+  height: 100px
+}
+</style>
