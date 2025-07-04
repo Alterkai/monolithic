@@ -56,6 +56,7 @@ export interface Chapter {
   name?: string | null;
   date_added: Date;
   manga_ID: number;
+  title: string;
 }
 
 // Table: image

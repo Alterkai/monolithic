@@ -1,18 +1,24 @@
 <template>
   <!-- BACK IMAGE -->
   <div class="h-[20rem] overflow-hidden -z-10 relative">
-    <NuxtImg ref="parallaxImage" v-slot="{ src, isLoaded }"
-      class="w-full object-cover opacity-30 blur-sm select-none inset-0" :src="mangaDetails?.cover"
-      :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">
-      <!-- Loaded image -->
-      <img v-if="isLoaded" :src="src" style="z-index: -10" />
-      <!-- Placeholder -->
-      <USkeleton v-else />
+    <USkeleton v-if="isLoading" class="w-full h-full" />
+    <NuxtImg v-else ref="parallaxImage" class="w-full object-cover opacity-30 blur-sm select-none inset-0"
+      :src="mangaDetails?.cover" :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">
     </NuxtImg>
   </div>
 
-  <div class="container flex -mt-16 z-10">
-    <div v-if="mangaDetails" class="flex flex-col min-md:flex-row gap-5">
+  <div class="container flex flex-col gap-5 -mt-16 z-10">
+    <!-- SKELETON LOADING -->
+    <div v-if="isLoading" class="flex flex-row gap-5">
+      <USkeleton class="w-[15rem] h-[20rem] mb-5" />
+      <div class="flex flex-col">
+        <USkeleton class="w-[20rem] h-8 mb-2" />
+        <USkeleton class="w-[10rem] h-8 mb-2" />
+        <USkeleton class="w-[20rem] h-4 mb-2 mt-4" />
+        <USkeleton class="w-[20rem] h-4 mb-2" />
+      </div>
+    </div>
+    <div v-if="mangaDetails && isLoading === false" class="flex flex-col min-md:flex-row gap-5">
       <!-- Cover -->
       <NuxtImg :src="mangaDetails.cover" class="min-md:h-[20rem]" style="width: auto" />
       <!-- Content -->
@@ -53,15 +59,25 @@
         <!-- GENRES -->
         <div class="flex flex-row gap-2 mt-4">
           <span v-for="genre in mangaDetails.genre" class="font-semibold text-sm">
-            <span v-if="genre == 'yuri'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{ capitalizeEachWord(genre) }}</span>
+            <span v-if="genre == 'yuri'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
+              capitalizeEachWord(genre) }}</span>
             <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre)
               }}</span>
           </span>
         </div>
 
-        <div class="" v-for="chapter in mangaDetails.chapters">
-          {{ chapter.number }}
-        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTERS -->
+    <p class="text-2xl font-semibold mt-5">Chapters</p>
+    <div v-if="mangaDetails" class="flex flex-col gap-4">
+      <div v-for="chapter in mangaDetails.chapters" :key="chapter.number" class="flex">
+        <NuxtLink
+          class="dark:bg-gray-700 dark:hover:bg-slate-800 light:bg-slate-200 light:hover:bg-slate-300 transition ease-in p-4 rounded-md font-semibold w-full"
+          :to="`/manga/${mangaDetails.id}/chapter/${chapter.number}`">
+          Chapter {{ chapter.number }} - {{ chapter.name }}
+        </NuxtLink>
       </div>
     </div>
   </div>
@@ -73,6 +89,7 @@
 import type { Chapter } from '@/types/database'
 import { capitalizeEachWord } from '@/server/utils/capitalizeEachWord'
 
+const isLoading = ref(false);
 const route = useRoute();
 const toast = useToast();
 const parallaxOffset = ref(0);
@@ -102,6 +119,7 @@ let mangaDetails = ref<MangaDetail | null>(null);
 // Fetch manga details
 async function fetchMangaDetails() {
   try {
+    isLoading.value = true;
     const results = await $fetch<MangaDetail>(`/api/manga/${route.params.id}`, {
       method: 'GET',
       headers: {
@@ -117,6 +135,8 @@ async function fetchMangaDetails() {
       color: 'error',
       duration: 5000
     });
+  } finally {
+    isLoading.value = false;
   }
 }
 

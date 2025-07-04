@@ -32,7 +32,7 @@
       </UFormField>
 
       <UButton v-if="isLoading" class="mt-4 justify-center" loading>Loading</UButton>
-      <UButton v-else type="submit" class="mt-4 justify-center">Register</UButton>
+      <UButton v-else type="submit" class="mt-4 justify-center" size="lg">Register</UButton>
 
       <ULink to="/login" class="text-center text-sm">
         Login

@@ -72,6 +72,11 @@ const modalOpen = ref(false);
 const searchResults = ref<SearchMangaResult[]>([]);
 const search = ref('');
 const authStore = useAuthStore();
+
+const userRoles = Array.isArray(authStore.user?.roles) ? authStore.user.roles : [];
+const isAdmin = authStore.user?.roles.includes('Admin');
+const isStaff = authStore.user?.isStaff || false;
+
 const items = computed<DropdownMenuItem[][]>(() => [
   [
     {
@@ -82,6 +87,21 @@ const items = computed<DropdownMenuItem[][]>(() => [
       type: 'label'
     }
   ],
+
+  ...(isAdmin ? [[
+    {
+      label: 'Admin Panel',
+      icon: 'i-lucide-shield-check',
+      to: '/admin'
+    }
+  ]] : []),
+  ...(isStaff ? [[
+    {
+      label: 'Staff Panel',
+      icon: 'i-lucide-users',
+      to: '/staff'
+    }
+  ]] : []),
   [
     {
       label: 'Profile',

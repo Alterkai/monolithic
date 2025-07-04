@@ -4,13 +4,18 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxt/image'],
   css: [
-    '@/assets/css/main.css'
+    '@/public/assets/css/main.css'
   ],
   ui: {
     theme: {
       colors: [
         'primary',
-        'secondary'
+        'secondary',
+        'success',
+        'info',
+        'warning',
+        'error',
+        'neutral'
       ]
     }
   }

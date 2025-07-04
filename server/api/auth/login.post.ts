@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
       username: users.username,
       email: users.email,
       staff: isStaff,
-      role: role,
+      roles: role,
     };
     const JWT_SECRET =
       process.env.JWT_SECRET || `secretgoeshere,butthisshouldbechanged>:(`;
@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
         username: users.username,
         name: users.name,
         email: users.email,
-        role: role,
+        roles: role,
         isStaff: isStaff,
         avatar: users.avatar
       },

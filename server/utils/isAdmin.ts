@@ -13,15 +13,15 @@ export default function isAdmin(token: any) {
   if (
     typeof decoded !== "object" ||
     decoded === null ||
-    !("role" in decoded) ||
-    !Array.isArray(decoded.role)
+    !("roles" in decoded) ||
+    !Array.isArray(decoded.roles)
   ) {
     throw createError({
       statusCode: 401,
       message: "Unauthorized",
     });
   }
-  if (!decoded.role.includes("Admin")) {
+  if (!decoded.roles.includes("Admin")) {
     throw createError({
       statusCode: 403,
       message: "Unauthorized",

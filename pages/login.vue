@@ -22,7 +22,7 @@
       <UButton v-if="isLoading" class="mt-4 justify-center" loading>Loading</UButton>
       <UButton v-else type="submit" class="mt-4 justify-center">Login</UButton>
 
-      <ULink to="/login" class="text-center text-sm">
+      <ULink to="/register" class="text-center text-sm" size="xl">
         Register
       </ULink>
     </UForm>
@@ -42,6 +42,7 @@ interface LoginResponse {
     username: string;
     isStaff: boolean;
     roles: string[];
+    avatar: string;
   };
 }
 
@@ -76,18 +77,18 @@ async function onSubmit() {
     });
 
     if (response && response.user) {
-      authStore.setUser(response.user);
+      authStore.setUser({ ...response.user, id: String(response.user.id) });
+      navigateTo('/');
     }
   } catch (error) {
     toast.add({
-      title: 'Login Failed',
-      description: 'An error occurred while logging in. Please try again.',
+      title: 'Wrong Password / Email!',
+      description: 'Wrong password or email, please try again.',
       color: 'error',
       duration: 5000
     });
   } finally {
     isLoading.value = false
-    navigateTo('/');
   }
 }
 </script>
