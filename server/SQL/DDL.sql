@@ -346,3 +346,23 @@ EXCEPTION
         RAISE EXCEPTION 'Gagal menambahkan genre "%" ke manga ID %: %', p_genre_name, p_manga_id, SQLERRM;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE VIEW bookmark_with_manga AS
+SELECT
+    b.ID,
+    b.last_read_chapter_id as last_read_chapter,
+    b.date_added,
+    b.user_ID,
+    b.manga_ID,
+    m.title AS manga_title,
+    m.original_title AS manga_original_title,
+    m.description AS manga_description,
+    m.author AS manga_author,
+    m.cover AS manga_cover,
+    m.ratings AS manga_ratings
+FROM
+    bookmark b
+JOIN
+    manga m ON b.manga_ID = m.ID
+ORDER BY
+    b.date_added DESC; -- Mengurutkan bookmark terbaru terlebih dahulu

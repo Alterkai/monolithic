@@ -42,8 +42,8 @@ export default defineEventHandler(async (event) => {
     }
     const result = await db.query(
       `
-      SELECT ID, username, name, email, avatar
-      FROM users
+      SELECT id, username, name, email, avatar, date_joined, roles
+      FROM user_with_roles
       WHERE id = $1`,
       [id]
     );
@@ -53,8 +53,8 @@ export default defineEventHandler(async (event) => {
     // Open to Public -- No need for Authentication
     const result = await db.query(
       `
-      SELECT ID, username, name, email, avatar
-      FROM users
+      SELECT id, username, name, email, avatar, date_joined, roles
+      FROM user_with_roles
       WHERE id = $1`,
       [id]
     );
