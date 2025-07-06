@@ -72,7 +72,7 @@ const modalOpen = ref(false);
 const searchResults = ref<SearchMangaResult[]>([]);
 const search = ref('');
 const authStore = useAuthStore();
-
+const userID = authStore.user?.id || null;
 const userRoles = Array.isArray(authStore.user?.roles) ? authStore.user.roles : [];
 const isAdmin = authStore.user?.roles.includes('Admin');
 const isStaff = authStore.user?.isStaff || false;
@@ -106,7 +106,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
     {
       label: 'Profile',
       icon: 'i-lucide-user',
-      to: '/user',
+      to: `/user/${userID}`,
     },
     {
       label: 'Settings',

@@ -53,7 +53,13 @@
             Read
           </UButton>
 
-          <UButton color="secondary" icon="i-lucide-bookmark" size="xl" />
+          <UButton color="secondary" variant="outline" icon="i-lucide-book-marked" size="xl">
+            Bookmark
+          </UButton>
+
+          <UButton v-if="isAdmin" color="neutral" variant="subtle" icon="i-lucide-file-plus-2" size="xl">
+            Add Chapter
+          </UButton>
         </div>
 
         <!-- GENRES -->
@@ -88,6 +94,11 @@
 <script setup lang="ts">
 import type { Chapter } from '@/types/database'
 import { capitalizeEachWord } from '@/server/utils/capitalizeEachWord'
+
+const authStore = useAuthStore();
+
+// Buat sekarang upload chapter cuman boleh sama admin
+const isAdmin = computed(() => authStore.user?.roles.includes('Admin'));
 
 const isLoading = ref(false);
 const route = useRoute();
