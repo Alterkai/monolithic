@@ -27,10 +27,11 @@
         <h1 class="font-bold text-xl">Bookmarks</h1>
         <div v-if="authStore.user">
           <div v-for="bookmark in userBookmarks">
-            {{ bookmark.manga_title }}
+            <!-- TODO: implement manga card -->
+            <MangacardBookmark :data="bookmark" />
           </div>
         </div>
-        
+
         <div v-else>
           <p class="text-gray-500">You need to be logged in to see bookmarks.</p>
         </div>

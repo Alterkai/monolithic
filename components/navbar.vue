@@ -19,7 +19,7 @@
               <p class="text-sm text-gray-500">Search results for "{{ search }}"</p>
 
               <div v-for="result in searchResults" class="cursor-pointer" :key="result.id" @click="handleMangaClick()">
-                <Mangacard :title="result.title" :description="result.description" :image="result.cover"
+                <Searchmangacard :title="result.title" :description="result.description" :image="result.cover"
                   :id="result.id" />
               </div>
             </div>

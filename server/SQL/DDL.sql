@@ -366,3 +366,74 @@ JOIN
     manga m ON b.manga_ID = m.ID
 ORDER BY
     b.date_added DESC; -- Mengurutkan bookmark terbaru terlebih dahulu
+
+CREATE OR REPLACE VIEW manga_latest_chapters AS
+SELECT
+    m.ID AS manga_id,
+    m.title AS manga_title,
+    m.original_title AS manga_original_title,
+    m.description AS manga_description,
+    m.author AS manga_author,
+    m.cover AS manga_cover,
+    m.ratings AS manga_ratings,
+    c.ID AS chapter_id,
+    c.number AS chapter_number,
+    c.name AS chapter_name,
+    c.date_added AS chapter_date_added
+FROM
+    manga m
+LEFT JOIN (
+    SELECT
+        c.manga_ID,
+        c.ID,
+        c.number,
+        c.name,
+        c.date_added,
+        ROW_NUMBER() OVER (PARTITION BY c.manga_ID ORDER BY c.date_added DESC
+        ) AS rn
+    FROM
+        chapter c
+) c ON m.ID = c.manga_ID AND c.rn = 1
+ORDER BY
+    m.ID, c.date_added DESC;
+
+CREATE OR REPLACE VIEW manga_latest_chapters_with_genres AS
+SELECT
+    m.ID AS manga_id,
+    m.title AS manga_title,
+    m.author AS manga_author,
+    m.cover AS manga_cover,
+    lc.chapter_number AS chapter_number,
+    -- Mengumpulkan genre ke dalam array JSON
+    COALESCE(
+        (
+            SELECT
+                JSON_AGG(
+                    JSON_BUILD_OBJECT('id', g.ID, 'name', g.name)
+                    ORDER BY g.name -- Urutkan genre berdasarkan nama dalam array
+                )
+            FROM
+                manga_genre mg
+            JOIN
+                genre g ON mg.genre_ID = g.ID
+            WHERE
+                mg.manga_ID = m.ID
+        ),
+        '[]'::json -- Jika tidak ada genre, kembalikan array kosong JSON
+    ) AS genres
+FROM
+    manga m
+LEFT JOIN (
+    -- Subquery untuk mendapatkan chapter terbaru untuk setiap manga
+    SELECT
+        c.manga_ID,
+        c.ID AS chapter_id,
+        c.number AS chapter_number,
+        c.name AS chapter_name,
+        c.date_added AS chapter_date_added,
+        ROW_NUMBER() OVER (PARTITION BY c.manga_ID ORDER BY c.date_added DESC) AS rn
+    FROM
+        chapter c
+) lc ON m.ID = lc.manga_ID AND lc.rn = 1
+ORDER BY
+    m.ID;

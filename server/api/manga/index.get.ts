@@ -12,7 +12,8 @@ export default defineEventHandler(async (event) => {
     const result = await db.query(
       `
       SELECT ID, title, original_title, description, author, cover, ratings
-      FROM manga`
+      FROM manga
+      LIMIT 30`
     );
     manga = result.rows;
     return manga

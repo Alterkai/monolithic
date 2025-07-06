@@ -42,7 +42,7 @@
         </div>
 
         <!-- DESCRIPTIONS -->
-        <p class="text-md text-neutral">{{ mangaDetails.description }}</p>
+        <p class="text-md text-neutral text-wrap ">{{ mangaDetails.description }}</p>
 
         <!-- AUTHOR -->
         <span class="text-md">Author: {{ mangaDetails.author }}</span>
