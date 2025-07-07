@@ -24,7 +24,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return result.rows.map((c) => ({
+  const c = result.rows[0];
+  return {
     chapter: c.chapter_number,
     name: c.chapter_name,
     date_added: c.chapter_date_added,
@@ -33,5 +34,5 @@ export default defineEventHandler(async (event) => {
       link: image.link,
       order: image.page_number,
     })),
-  }))
+  };
 })

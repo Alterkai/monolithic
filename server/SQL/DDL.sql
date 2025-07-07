@@ -304,7 +304,8 @@ SELECT
                 'comment', mc.comment,
                 'date_added', mc.date_added,
                 'user_id', mc.user_ID,
-                'user_name', u.name
+                'user_name', u.name,
+                'user_avatar', u.avatar
             )
             ORDER BY mc.date_added ASC 
         ) FILTER (WHERE mc.ID IS NOT NULL),

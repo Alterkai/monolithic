@@ -57,7 +57,8 @@
             Bookmark
           </UButton>
 
-          <UButton v-if="isAdmin" color="neutral" variant="subtle" icon="i-lucide-file-plus-2" size="xl">
+          <UButton @click="navigateTo(`/admin/addChapter?m_id=${route.params.id}`)" v-if="isAdmin" color="neutral"
+            variant="subtle" icon="i-lucide-file-plus-2" size="xl">
             Add Chapter
           </UButton>
         </div>
@@ -76,15 +77,22 @@
     </div>
 
     <!-- CHAPTERS -->
-    <p class="text-2xl font-semibold mt-5">Chapters</p>
-    <div v-if="mangaDetails" class="flex flex-col gap-4">
+    <p class="text-xl font-semibold mt-5">Chapters</p>
+    <div v-if="mangaDetails" class="max-h-[20rem] overflow-y-scroll flex flex-col gap-4 p-4 rounded-sm bg-accented">
       <div v-for="chapter in mangaDetails.chapters" :key="chapter.number" class="flex">
         <NuxtLink
-          class="dark:bg-gray-700 dark:hover:bg-slate-800 light:bg-slate-200 light:hover:bg-slate-300 transition ease-in p-4 rounded-md font-semibold w-full"
+          class="dark:hover:bg-slate-800 light:hover:bg-slate-300 outline outline-current/40 transition ease-in p-2 rounded-md font-semibold w-full"
           :to="`/manga/${mangaDetails.id}/chapter/${chapter.number}`">
           Chapter {{ chapter.number }} - {{ chapter.name }}
+          <p class="text-sm font-light">{{ timeAgo(chapter.date_added) }}</p>
         </NuxtLink>
       </div>
+    </div>
+
+    <!-- COMMENTS -->
+    <p class="text-xl font-semibold mt-5">Comments</p>
+    <div class="max-h-[20rem] overflow-y-scroll rounded-md">
+      <CommentsContainer :manga_id="manga_id" />
     </div>
   </div>
 </template>
@@ -92,6 +100,7 @@
 <style scoped></style>
 
 <script setup lang="ts">
+import { timeAgo } from '~/server/utils/format'
 import type { Chapter } from '@/types/database'
 import { capitalizeEachWord } from '@/server/utils/capitalizeEachWord'
 
@@ -105,6 +114,7 @@ const route = useRoute();
 const toast = useToast();
 const parallaxOffset = ref(0);
 const parallaxImage = ref(null);
+const manga_id = route.params.id as string;
 
 interface MangaDetail {
   id: number,

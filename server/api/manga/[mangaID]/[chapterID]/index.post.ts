@@ -1,42 +1,81 @@
 export default defineEventHandler(async (event) => {
-  let manga_id = getRouterParam(event, "mangaID") as string | undefined;
-  let chapter_id = getRouterParam(event, "chapterID") as number | undefined;
+  const manga_id = getRouterParam(event, "mangaID");
+  const chapter_number = getRouterParam(event, "chapterID");
 
-  if (!manga_id || !chapter_id) {
+  if (!manga_id || !chapter_number) {
     throw createError({
       statusCode: 400,
-      message: "Manga ID and Chapter ID are required",
+      message: "Manga ID and Chapter Number are required",
     });
   }
 
-  let body = await readBody(event);
-  let { data } = body;
-  // if ( data.page_number.isNumber || data.link.isURL) {
-  //   throw createError({
-  //     statusCode: 400,
-  //     message: 'Page number must be a number and link must be a valid URL',
-  //   });
-  // }
+  const body = await readBody(event);
+  const { name, images } = body;
 
-  // ChapterID (params) == chapter_number (db)
-  // page_number and link will come in batches/array of json
-  chapter_id = parseInt(chapter_id.toString())
-  let command = `INSERT INTO image (page_number, link, chapter_ID) VALUES `;
-  let values: any = [];
-  
-  data.forEach((image: any, index: number) => {
-    index *= 3;
-    command += `($${index + 1}, $${index + 2}, $${index + 3}), `;
-    values.push(image.page_number, image.link, chapter_id);
-  });
-  command = command.slice(0, -2);
-  command += ` RETURNING id`;
+  if (!name || !Array.isArray(images) || images.length === 0) {
+    throw createError({
+      statusCode: 400,
+      message: "Chapter name and a non-empty array of images are required",
+    });
+  }
 
-  const result = await db.query(command, values);
-  if (result.rows.length === 0) {
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. Insert the new chapter and get its ID
+    const chapterInsertQuery = `
+      INSERT INTO chapter (manga_ID, number, name) 
+      VALUES ($1, $2, $3) 
+      RETURNING ID
+    `;
+    const chapterInsertValues = [manga_id, chapter_number, name];
+    const chapterResult = await client.query(
+      chapterInsertQuery,
+      chapterInsertValues
+    );
+    const newChapterId = chapterResult.rows[0].id;
+
+    if (!newChapterId) {
+      throw new Error("Failed to create new chapter.");
+    }
+
+    // 2. Insert all images for the new chapter
+    let imageInsertQuery = `INSERT INTO image (page_number, link, chapter_ID) VALUES `;
+    let imageValues: any[] = [];
+    let valueIndex = 1;
+
+    images.forEach((image: any) => {
+      imageInsertQuery += `($${valueIndex++}, $${valueIndex++}, $${valueIndex++}), `;
+      imageValues.push(image.page_number, image.link, newChapterId);
+    });
+
+    // Remove trailing comma and space
+    imageInsertQuery = imageInsertQuery.slice(0, -2);
+    imageInsertQuery += ` RETURNING id`;
+
+    const imageResult = await client.query(imageInsertQuery, imageValues);
+
+    if (imageResult.rows.length !== images.length) {
+      throw new Error("Failed to insert all images for the chapter.");
+    }
+
+    await client.query("COMMIT");
+
+    return {
+      success: true,
+      message: `Chapter ${chapter_number} and ${images.length} images added successfully.`,
+      chapterId: newChapterId,
+      imageIds: imageResult.rows.map((row) => row.id),
+    };
+  } catch (error: any) {
+    await client.query("ROLLBACK");
     throw createError({
       statusCode: 500,
-      message: "Failed to add images to chapter",
+      message: `Failed to add chapter and images: ${error.message}`,
     });
+  } finally {
+    client.release();
   }
 });

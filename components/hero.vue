@@ -1,10 +1,9 @@
 <template >
-  <UCarousel :autoplay="{ delay: 5000 }" :items="data" v-slot="{ item }" :ui="{ item: height }" class="w-full overflow-hidden">
+  <UCarousel :autoplay="{ delay: 5000 }" loop :items="data" v-slot="{ item }" :ui="{ item: height }" class="w-full overflow-hidden">
     <div class="h-full">
       <NuxtImg :src="item.manga_cover" class="absolute inset-0 w-full h-full object-cover -z-10" alt="Hero background" />
-
       <!-- Gradient Overlay for Readability -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+      <div class="absolute inset-0 bg-gradient-to-t " />
 
       <!-- Main Content -->
       <div class="relative z-10 h-full flex flex-col justify-end">
@@ -28,7 +27,7 @@
             <div
               class="bg-primary p-4 md:p-6 text-slate-950 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-between w-full md:w-auto">
               <div class="text-center max-md:text-left">
-                <p class="font-bold text-2xl md:text-3xl">#54</p>
+                <p class="font-bold text-2xl md:text-3xl">#{{ item.chapter_number !== null ? parseInt(item.chapter_number.toString()) : 0 }}</p>
                 <p class="text-xs font-semibold uppercase">Latest Chapter</p>
               </div>
               <NuxtLink :to="`/manga/30`" class="ml-4">
@@ -53,9 +52,11 @@ interface Genre {
 }
 
 interface CarouselItem {
+  manga_id: number;
   manga_title: string;
   manga_description: string;
   manga_cover: string;
+  chapter_number: number;
   genres: Genre[];
 }
 
