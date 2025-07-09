@@ -1,7 +1,7 @@
 import { db } from "~/server/utils/db";
-import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+import { BlobServiceClient } from "@azure/storage-blob";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -51,11 +51,6 @@ export default defineEventHandler(async (event) => {
 
     // Handle file upload jika ada
     if (coverFile && coverFile.data) {
-      const uploadDir = path.join(process.cwd(), "public", "images", "covers");
-
-      // Create directory if it doesn't exist
-      await fs.mkdir(uploadDir, { recursive: true });
-
       // Generate unique filename
       const fileExtension = path
         .extname(coverFile.filename || "")
@@ -69,18 +64,38 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      const uniqueFilename = `${randomUUID()}${fileExtension}`;
-      const filePath = path.join(uploadDir, uniqueFilename);
+      // save to blob storage
+      const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+      const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME;
+      const cdnURL = process.env.CDN_URL;
 
-      // Save file
-      await fs.writeFile(filePath, coverFile.data);
-      coverPath = `/images/covers/${uniqueFilename}`;
+      if (!connectionString || !containerName || !cdnURL) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: "Server configuration is incomplete.",
+        });
+      }
+
+      const blobServiceClient =
+        BlobServiceClient.fromConnectionString(connectionString);
+      const containerClient =
+        blobServiceClient.getContainerClient(containerName);
+      const uniqueFilename = `${randomUUID()}${fileExtension}`;
+      const blockBlobClient =
+        containerClient.getBlockBlobClient(uniqueFilename);
+
+      // Upload data buffer to Azure Blob Storage
+      await blockBlobClient.uploadData(coverFile.data, {
+        blobHTTPHeaders: { blobContentType: coverFile.type },
+      });
+
+      // Set coverPath to the public URL of the uploaded blob
+      coverPath = `${cdnURL}/${containerName}/${uniqueFilename}`;
     }
 
     // Basic validation for required fields
     if (
       !title ||
-      !description ||
       !author ||
       !coverPath ||
       typeof ratings !== "number" ||
@@ -138,15 +153,8 @@ export default defineEventHandler(async (event) => {
         await client.query("ROLLBACK;"); // Rollback on error
       }
 
-      // Clean up uploaded file jika database error
-      if (coverPath && coverPath.startsWith("/images/covers/")) {
-        try {
-          const filePath = path.join(process.cwd(), "public", coverPath);
-          await fs.unlink(filePath);
-        } catch (cleanupError) {
-          console.error("Error cleaning up uploaded file:", cleanupError);
-        }
-      }
+      // NOTE: Local file cleanup logic is removed as
+      // it's no longer needed with direct Azure Blob Storage upload
 
       console.error("Error adding manga and genres:", error);
 

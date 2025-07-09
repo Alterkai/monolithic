@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   css: [
     '@/public/assets/css/main.css'
   ],
+  image: {
+    domains: [
+      'cdn2.alterkaiscans.my.id'
+    ]
+  },
   ui: {
     theme: {
       colors: [

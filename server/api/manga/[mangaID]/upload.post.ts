@@ -6,8 +6,9 @@ export default defineEventHandler(async (event) => {
   const mangaID = getRouterParam(event, "mangaID");
   const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
   const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME;
+  const cdnURL = process.env.CDN_URL;
 
-  if (!connectionString || !containerName || !mangaID) {
+  if (!connectionString || !containerName || !mangaID || !cdnURL) {
     throw createError({
       statusCode: 500,
       message: "Server configuration is incomplete.",
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
       await blockBlobClient.uploadData(file.data, {
         blobHTTPHeaders: { blobContentType: file.type },
       });
-      return { page_number: index + 1, link: blockBlobClient.url };
+      return { page_number: index + 1, link: `${cdnURL}/${containerName}/${blobName}` };
     });
 
     const uploadedImages = await Promise.all(uploadPromises);

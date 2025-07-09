@@ -16,11 +16,13 @@
       <div class="my-4">
         <h1 class="text-2xl font-bold">{{ chapterData.title }}</h1>
         <p class="text-sm font-current/60">{{ `Chapter ${parseInt(chapterData.chapter.toString())}` }}</p>
+        <UButton class="mt-2" variant="subtle" @click="isLongstrip = !isLongstrip">{{ isLongstrip ? "Horizontal View" : "Vertical View"}}</UButton>
       </div>
 
       <!-- Render Images -->
       <div class="flex flex-col items-center">
-        <ViewerHorizontal :data="chapterData.images" />
+        <ViewerVertical v-if="isLongstrip" :data="chapterData.images" />
+        <ViewerHorizontal v-else :data="chapterData.images" />
       </div>
 
       <CommentsContainer :manga_id="mangaID" :chapter_id="parseInt(chapterID)" />
@@ -33,6 +35,8 @@ const toast = useToast();
 const route = useRoute();
 const mangaID = route.params.id as string;
 const chapterID = route.params.chapterID as string;
+
+const isLongstrip = ref(false);
 
 interface Image {
   id: number;
