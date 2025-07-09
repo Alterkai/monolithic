@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
 
   const c = result.rows[0];
   return {
+    title: c.manga_title,
     chapter: c.chapter_number,
     name: c.chapter_name,
     date_added: c.chapter_date_added,

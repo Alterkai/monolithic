@@ -1,7 +1,7 @@
 <template>
   <!-- BACK IMAGE -->
   <div class="h-[20rem] overflow-hidden -z-10 relative">
-    <USkeleton v-if="isLoading" class="w-full h-full" />
+    <USkeleton v-if="pending" class="w-full h-full" />
     <NuxtImg v-else ref="parallaxImage" class="w-full object-cover opacity-30 blur-sm select-none inset-0"
       :src="mangaDetails?.cover" :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">
     </NuxtImg>
@@ -9,7 +9,7 @@
 
   <div class="container flex flex-col gap-5 -mt-16 z-10">
     <!-- SKELETON LOADING -->
-    <div v-if="isLoading" class="flex flex-row gap-5">
+    <div v-if="pending" class="flex flex-row gap-5">
       <USkeleton class="w-[15rem] h-[20rem] mb-5" />
       <div class="flex flex-col">
         <USkeleton class="w-[20rem] h-8 mb-2" />
@@ -18,7 +18,11 @@
         <USkeleton class="w-[20rem] h-4 mb-2" />
       </div>
     </div>
-    <div v-if="mangaDetails && isLoading === false" class="flex flex-col min-md:flex-row gap-5">
+    <!-- ERROR STATE -->
+    <div v-else-if="error">
+      <p>Could not load manga details. Please try again later.</p>
+    </div>
+    <div v-else-if="mangaDetails" class="flex flex-col min-md:flex-row gap-5">
       <!-- Cover -->
       <NuxtImg :src="mangaDetails.cover" class="min-md:h-[20rem]" style="width: auto" />
       <!-- Content -->
@@ -69,7 +73,7 @@
             <span v-if="genre == 'yuri'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
               capitalizeEachWord(genre) }}</span>
             <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre)
-              }}</span>
+            }}</span>
           </span>
         </div>
 
@@ -79,6 +83,9 @@
     <!-- CHAPTERS -->
     <p class="text-xl font-semibold mt-5">Chapters</p>
     <div v-if="mangaDetails" class="max-h-[20rem] overflow-y-scroll flex flex-col gap-4 p-4 rounded-sm bg-accented">
+      <div v-if="mangaDetails.chapters.length === 0" class="text-center text-current/60">
+        No chapters available for this manga.
+      </div>
       <div v-for="chapter in mangaDetails.chapters" :key="chapter.number" class="flex">
         <NuxtLink
           class="dark:hover:bg-slate-800 light:hover:bg-slate-300 outline outline-current/40 transition ease-in p-2 rounded-md font-semibold w-full"
@@ -109,7 +116,6 @@ const authStore = useAuthStore();
 // Buat sekarang upload chapter cuman boleh sama admin
 const isAdmin = computed(() => authStore.user?.roles.includes('Admin'));
 
-const isLoading = ref(false);
 const route = useRoute();
 const toast = useToast();
 const parallaxOffset = ref(0);
@@ -128,6 +134,23 @@ interface MangaDetail {
   author: string,
 }
 
+// Fetch data using useAsyncData
+const { data: mangaDetails, pending, error } = await useAsyncData<MangaDetail>(
+  `manga-details-${manga_id}`,
+  () => $fetch(`/api/manga/${manga_id}`)
+);
+
+// Handle potential errors from the fetch operation
+if (error.value) {
+  console.error('Error fetching manga details:', error.value);
+  toast.add({
+    title: 'Error',
+    description: 'Failed to fetch manga details.',
+    color: 'error',
+    duration: 5000
+  });
+}
+
 const handleScroll = () => {
   if (parallaxImage.value) {
     const scrolled = window.pageYOffset;
@@ -136,33 +159,7 @@ const handleScroll = () => {
   }
 }
 
-let mangaDetails = ref<MangaDetail | null>(null);
-// Fetch manga details
-async function fetchMangaDetails() {
-  try {
-    isLoading.value = true;
-    const results = await $fetch<MangaDetail>(`/api/manga/${route.params.id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    mangaDetails.value = results;
-  } catch (error) {
-    console.error('Error fetching manga details:', error);
-    toast.add({
-      title: 'Error',
-      description: 'Failed to fetch manga details.',
-      color: 'error',
-      duration: 5000
-    });
-  } finally {
-    isLoading.value = false;
-  }
-}
-
 onMounted(() => {
-  fetchMangaDetails();
   window.addEventListener('scroll', handleScroll);
 })
 

@@ -13,10 +13,7 @@ export default defineEventHandler(async (event) => {
     LIMIT 5;`);
   
   if (!result || result.rows.length === 0) {
-    throw createError({
-      statusCode: 404,
-      message: 'No daily highlights found'
-    });
+    return [];
   }
 
   return result.rows

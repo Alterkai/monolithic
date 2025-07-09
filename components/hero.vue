@@ -1,7 +1,7 @@
 <template >
   <UCarousel :autoplay="{ delay: 5000 }" loop :items="data" v-slot="{ item }" :ui="{ item: height }" class="w-full overflow-hidden">
     <div class="h-full">
-      <NuxtImg :src="item.manga_cover" class="absolute inset-0 w-full h-full object-cover -z-10" alt="Hero background" />
+      <NuxtImg :src="item.manga_cover" class="absolute w-full h-auto object-cover object-center -z-10" alt="Hero background" />
       <!-- Gradient Overlay for Readability -->
       <div class="absolute inset-0 bg-gradient-to-t " />
 
@@ -16,7 +16,7 @@
               <h1 class="text-white text-2xl min-md:text-3xl font-bold line-clamp-2 leading-tight">
                 {{ item.manga_title }}
               </h1>
-              <div class="flex flex-row flex-wrap gap-2 mt-3">
+              <div class="flex flex-row flex-wrap gap-2 mt-3 max-h-[1.5rem] overflow-hidden">
                 <div v-for="genre in item.genres" :key="genre.id" class="text-white bg-white/20 px-2 py-1 text-xs rounded">
                   {{ capitalizeEachWord(genre.name) }}
                 </div>

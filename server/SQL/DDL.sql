@@ -230,6 +230,7 @@ ORDER BY
 -- VIEW: get chapter with images
 CREATE OR REPLACE VIEW chapter_with_images AS
 SELECT
+    m.title AS manga_title,
     c.ID AS chapter_id,
     c.number AS chapter_number,
     c.name AS chapter_name,
@@ -250,8 +251,10 @@ FROM
     chapter c
 LEFT JOIN
     image i ON c.ID = i.chapter_ID
+JOIN
+    manga m ON c.manga_ID = m.ID
 GROUP BY
-    c.ID, c.number, c.name, c.date_added, c.manga_ID
+    c.ID, c.number, c.name, c.date_added, c.manga_ID, m.title
 ORDER BY
     c.ID;
 

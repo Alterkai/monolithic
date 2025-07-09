@@ -1,5 +1,5 @@
 <template>
-  <nav class="flex flex-row justify-between container py-5">
+  <nav class="flex flex-row justify-between items-center container py-5">
     <NuxtLink to="/" class="font-bold text-2xl">Alterkai</NuxtLink>
 
     <div class="flex items-center gap-4">
@@ -7,12 +7,14 @@
       <!-- SEARCH BUTTON -->
       <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center'}">
         <!-- BUTTON -->
-        <UButton icon="i-lucide-search" variant="outline" color="neutral" class="min-w-[10rem]">Search...</UButton>
+        <UButton icon="i-lucide-search" variant="ghost" color="neutral" class="min-md:hidden" />
+        <UButton icon="i-lucide-search" variant="outline" color="neutral" class="max-md:hidden min-w-[10rem]">Search...</UButton>
+        
 
         <!-- SEARCH CONTENT -->
         <template #content>
           <div class="p-4">
-            <UInput v-model="search" icon="i-lucide-search" placeholder="Search" class="w-full"></UInput>
+            <UInput v-model="search" icon="i-lucide-search" placeholder="Search" class="w-full" />
 
             <!-- SEARCH RESULTS -->
             <div v-if="search.length > 0" class="mt-2">
@@ -33,9 +35,7 @@
 
       <!-- USER AVATAR OR LOGIN BUTTON -->
       <ULink v-if="authStore.isLoggedIn == false" to="/login">
-        <UButton icon="i-lucide-log-in" variant="subtle">
-          Login
-        </UButton>
+        <UButton icon="i-lucide-log-in" variant="subtle" />
       </ULink>
       <UDropdownMenu v-else :items="items" :content="{ side: 'bottom', align: 'end' }" :ui="{ content: 'wd-48' }">
         <UAvatar icon="i-lucide-image" size="xl" :src="authStore.user?.avatar"

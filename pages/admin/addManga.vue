@@ -98,7 +98,13 @@ const onSubmit = async () => {
       formData.append('cover', state.cover);
     }
 
-    const response = await $fetch('/api/manga', {
+    interface MangaResponse {
+      data: {
+        mangaId: number;
+      };
+    }
+
+    const response = await $fetch<MangaResponse>('/api/manga', {
       method: 'POST',
       body: formData,
     });
@@ -110,6 +116,8 @@ const onSubmit = async () => {
       color: 'success',
       duration: 5000
     });
+
+    await navigateTo(`/manga/${response.data.mangaId}`)
   } catch (error) {
     console.error('Error adding manga:', error);
     toast.add({
