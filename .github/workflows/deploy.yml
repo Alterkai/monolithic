@@ -27,7 +27,7 @@ jobs:
       - name: Archive build artifacts
         # Mengarsipkan folder 'dist' (atau 'build') yang dihasilkan oleh npm run build
         # Sesuaikan 'dist' jika folder build Anda bernama lain
-        run: tar -czvf build-artifact.tar.gz dist node_modules package.json # Tambahkan file/folder lain yang diperlukan
+        run: tar -czvf build-artifact.tar.gz dist package.json # Tambahkan file/folder lain yang diperlukan
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.1
