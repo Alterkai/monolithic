@@ -1,0 +1,65 @@
+name: Node.js CI/CD to VPS
+
+on:
+  push:
+    branches:
+      - main # Trigger saat ada push ke branch 'main'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest # Runner yang digunakan oleh GitHub Actions
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Mengambil kode dari repositori
+
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Build application
+        run: npm run build
+
+      - name: Archive build artifacts
+        # Mengarsipkan folder 'dist' (atau 'build') yang dihasilkan oleh npm run build
+        # Sesuaikan 'dist' jika folder build Anda bernama lain
+        run: tar -czvf build-artifact.tar.gz dist node_modules package.json # Tambahkan file/folder lain yang diperlukan
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pastikan direktori aplikasi ada
+            mkdir -p ${{ secrets.APP_DIR_ON_VPS }}
+
+            # Pindah ke direktori aplikasi
+            cd ${{ secrets.APP_DIR_ON_VPS }}
+
+            # Hapus file lama (opsional, tergantung strategi deployment Anda)
+            # Hati-hati dengan perintah rm -rf!
+            rm -rf dist node_modules package.json # Sesuaikan dengan apa yang Anda hapus
+
+            # Mengirim artifact build dari GitHub Actions ke VPS
+            # Menggunakan pipe untuk langsung mengirim dari runner ke VPS
+            # Ini lebih efisien daripada scp/rsync terpisah
+            # Perhatikan bahwa ini akan membuat file build-artifact.tar.gz di APP_DIR_ON_VPS
+            echo "Downloading and extracting build artifact..."
+            tar -xzvf - <(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L "https://api.github.com/repos/${{ github.repository }}/actions/artifacts?name=build-artifact.tar.gz" | jq -r '.artifacts[0].archive_download_url' | xargs curl -s -L -o -)
+
+            # Hapus file tar setelah diekstrak (opsional)
+            rm build-artifact.tar.gz
+
+            # Restart aplikasi Node.js menggunakan PM2
+            # Jika ini deployment pertama, Anda mungkin perlu 'pm2 start' bukan 'pm2 restart'
+            # Anda bisa menambahkan logika if/else di sini
+            echo "Restarting Node.js application with PM2..."
+            pm2 restart ${{ secrets.APP_PROCESS_NAME }} || pm2 start npm --name ${{ secrets.APP_PROCESS_NAME }} -- start
+
+            echo "Deployment complete!"
