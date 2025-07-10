@@ -13,53 +13,51 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # Mengambil kode dari repositori
 
-      - name: Set up Node.js environment
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
-      - name: Install dependencies
-        run: npm install --production
+      - name: Install dependencies and build
+        # Install SEMUA dependensi (termasuk devDependencies) yang dibutuhkan untuk build
+        run: |
+          npm install
+          npm run build
 
-      - name: Build application
-        run: npm run build
+      - name: Prepare deployment package
+        # Arsipkan hanya file yang dibutuhkan di server produksi
+        run: tar -czvf deploy.tar.gz .output package.json
 
-      - name: Archive build artifacts
-        # Mengarsipkan folder 'dist' (atau 'build') yang dihasilkan oleh npm run build
-        # Sesuaikan 'dist' jika folder build Anda bernama lain
-        run: tar -czvf build-artifact.tar.gz .output package.json # Tambahkan file/folder lain yang diperlukan
+      - name: Deploy package to VPS
+        # Gunakan scp-action untuk MENDORONG file ke VPS. Ini lebih andal.
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy.tar.gz"
+          target: "${{ secrets.APP_DIR_ON_VPS }}"
 
-      - name: Deploy to VPS via SSH
+      - name: Install dependencies and restart server
+        # Gunakan ssh-action untuk menjalankan perintah di VPS
         uses: appleboy/ssh-action@v1.0.1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Pastikan direktori aplikasi ada
-            mkdir -p ${{ secrets.APP_DIR_ON_VPS }}
-
             # Pindah ke direktori aplikasi
             cd ${{ secrets.APP_DIR_ON_VPS }}
 
-            # Hapus file lama (opsional, tergantung strategi deployment Anda)
-            # Hati-hati dengan perintah rm -rf!
-            rm -rf .output package.json # Sesuaikan dengan apa yang Anda hapus
+            # Ekstrak paket yang baru saja di-upload
+            tar -xzvf deploy.tar.gz
+            rm deploy.tar.gz
 
-            # Mengirim artifact build dari GitHub Actions ke VPS
-            # Menggunakan pipe untuk langsung mengirim dari runner ke VPS
-            # Ini lebih efisien daripada scp/rsync terpisah
-            # Perhatikan bahwa ini akan membuat file build-artifact.tar.gz di APP_DIR_ON_VPS
-            echo "Downloading and extracting build artifact..."
-            tar -xzvf - <(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L "https://api.github.com/repos/${{ github.repository }}/actions/artifacts?name=build-artifact.tar.gz" | jq -r '.artifacts[0].archive_download_url' | xargs curl -s -L -o -)
+            # Install HANYA dependensi produksi
+            npm install --production
 
-            # Hapus file tar setelah diekstrak (opsional)
-            rm build-artifact.tar.gz
+            # Restart aplikasi dengan PM2.
+            # Menggunakan path langsung ke file server lebih baik daripada 'npm start'
+            pm2 restart ${{ secrets.APP_PROCESS_NAME }} || pm2 start .output/server/index.mjs --name ${{ secrets.APP_PROCESS_NAME }}
 
-            # Restart aplikasi Node.js menggunakan PM2
-            # Jika ini deployment pertama, Anda mungkin perlu 'pm2 start' bukan 'pm2 restart'
-            # Anda bisa menambahkan logika if/else di sini
-            echo "Restarting Node.js application with PM2..."
-            pm2 restart ${{ secrets.APP_PROCESS_NAME }} || pm2 start npm --name ${{ secrets.APP_PROCESS_NAME }} -- start
-
-            echo "Deployment complete!"
+            echo "Deployment successful!"
