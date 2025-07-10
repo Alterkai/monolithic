@@ -25,8 +25,8 @@ jobs:
           npm run build
 
       - name: Prepare deployment package
-        # Arsipkan hanya file yang dibutuhkan di server produksi
-        run: tar -czvf deploy.tar.gz .output package.json
+        # Arsipkan file produksi, dan kecualikan direktori node_modules di dalam .output
+        run: tar --exclude='.output/server/node_modules' -czvf deploy.tar.gz .output package.json
 
       - name: Deploy package to VPS
         # Gunakan scp-action untuk MENDORONG file ke VPS. Ini lebih andal.
