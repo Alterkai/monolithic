@@ -1,4 +1,4 @@
-import { db } from "~/server/utils/db";
+import { db } from "~/utils/db";
 import validator from "validator";
 import * as argon2 from "argon2";
 import jwt from "jsonwebtoken";
@@ -107,7 +107,7 @@ export default defineEventHandler(async (event) => {
         email: users.email,
         roles: role,
         isStaff: isStaff,
-        avatar: users.avatar
+        avatar: users.avatar,
       },
     };
   } catch (error) {

@@ -5,11 +5,12 @@
     <div class="flex items-center gap-4">
 
       <!-- SEARCH BUTTON -->
-      <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center'}">
+      <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center' }">
         <!-- BUTTON -->
         <UButton icon="i-lucide-search" variant="ghost" color="neutral" class="min-md:hidden" />
-        <UButton icon="i-lucide-search" variant="outline" color="neutral" class="max-md:hidden min-w-[10rem]">Search...</UButton>
-        
+        <UButton icon="i-lucide-search" variant="outline" color="neutral" class="max-md:hidden min-w-[10rem]">Search...
+        </UButton>
+
 
         <!-- SEARCH CONTENT -->
         <template #content>
@@ -29,18 +30,20 @@
         </template>
       </UModal>
 
-      <!-- TOGGLE DARK/LIGHT MODE -->
-      <UButton :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'" color="neutral" variant="ghost"
-        @click="isDark = !isDark" />
+      <ClientOnly>
+        <!-- TOGGLE DARK/LIGHT MODE -->
+        <UButton :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'" color="neutral" variant="ghost"
+          @click="isDark = !isDark" />
 
-      <!-- USER AVATAR OR LOGIN BUTTON -->
-      <ULink v-if="authStore.isLoggedIn == false" to="/login">
-        <UButton icon="i-lucide-log-in" variant="subtle" />
-      </ULink>
-      <UDropdownMenu v-else :items="items" :content="{ side: 'bottom', align: 'end' }" :ui="{ content: 'wd-48' }">
-        <UAvatar icon="i-lucide-image" size="xl" :src="authStore.user?.avatar"
-          class="cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all" />
-      </UDropdownMenu>
+        <!-- USER AVATAR OR LOGIN BUTTON -->
+        <ULink v-if="authStore.isLoggedIn == false" to="/login">
+          <UButton icon="i-lucide-log-in" variant="subtle" />
+        </ULink>
+        <UDropdownMenu v-else :items="items" :content="{ side: 'bottom', align: 'end' }" :ui="{ content: 'wd-48' }">
+          <UAvatar icon="i-lucide-image" size="xl" :src="authStore.user?.avatar"
+            class="cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all" />
+        </UDropdownMenu>
+      </ClientOnly>
     </div>
   </nav>
 </template>
@@ -48,7 +51,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import type { DropdownMenuItem } from '@nuxt/ui';
-import { debounce } from '@/server/utils/debounce'
+import { debounce } from '~/utils/debounce'
 
 interface SearchMangaResult {
   title: string;
@@ -140,7 +143,7 @@ const performSearch = async (query: string) => {
       searchResults.value = [];
     }
   } catch (error) {
-    
+
   }
 }
 

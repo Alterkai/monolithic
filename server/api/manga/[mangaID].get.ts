@@ -1,5 +1,5 @@
 // Manga with Params
-import { db } from "~/server/utils/db";
+import { db } from "~/utils/db";
 
 export default defineEventHandler(async (event) => {
   let id = getRouterParam(event, "mangaID");
@@ -43,5 +43,4 @@ export default defineEventHandler(async (event) => {
       date_added: chapter.date_added,
     })),
   };
-  }
-);
+});

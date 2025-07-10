@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { timeAgo } from '~/server/utils/format'
+import { timeAgo } from '~/utils/format'
 
 defineProps({
   data: {

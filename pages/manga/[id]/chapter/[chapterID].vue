@@ -3,7 +3,6 @@
     <!-- Loading State -->
     <div v-if="pending">
       <p>Loading chapter...</p>
-      <!-- Anda bisa menambahkan komponen skeleton di sini -->
     </div>
 
     <!-- Error State -->
@@ -35,8 +34,8 @@ const toast = useToast();
 const route = useRoute();
 const mangaID = route.params.id as string;
 const chapterID = route.params.chapterID as string;
-
-const isLongstrip = ref(false);
+const isLongstrip = ref(true);
+const lastReadStore = useLastReadStore();
 
 interface Image {
   id: number;
@@ -66,4 +65,8 @@ if (error.value) {
     duration: 5000
   });
 }
+
+onMounted(() => {
+  lastReadStore.setLastRead(parseInt(mangaID), parseInt(chapterID))
+})
 </script>

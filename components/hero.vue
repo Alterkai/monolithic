@@ -1,7 +1,9 @@
-<template >
-  <UCarousel :autoplay="{ delay: 5000 }" loop :items="data" v-slot="{ item }" :ui="{ item: height }" class="w-full overflow-hidden">
+<template>
+  <UCarousel :autoplay="{ delay: 5000 }" loop :items="data" v-slot="{ item }" :ui="{ item: height }"
+    class="w-full overflow-hidden">
     <div class="h-full">
-      <NuxtImg :src="item.manga_cover" class="absolute w-full h-auto object-cover object-center -z-10" alt="Hero background" />
+      <NuxtImg :src="item.manga_cover" class="absolute w-full h-auto object-cover object-center -z-10"
+        alt="Hero background" />
       <!-- Gradient Overlay for Readability -->
       <div class="absolute inset-0 bg-gradient-to-t " />
 
@@ -17,7 +19,8 @@
                 {{ item.manga_title }}
               </h1>
               <div class="flex flex-row flex-wrap gap-2 mt-3 max-h-[1.5rem] overflow-hidden">
-                <div v-for="genre in item.genres" :key="genre.id" class="text-white bg-white/20 px-2 py-1 text-xs rounded">
+                <div v-for="genre in item.genres" :key="genre.id"
+                  class="text-white bg-white/20 px-2 py-1 text-xs rounded">
                   {{ capitalizeEachWord(genre.name) }}
                 </div>
               </div>
@@ -27,7 +30,8 @@
             <div
               class="bg-primary p-4 md:p-6 text-slate-950 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-between w-full md:w-auto">
               <div class="text-center max-md:text-left">
-                <p class="font-bold text-2xl md:text-3xl">#{{ item.chapter_number !== null ? parseInt(item.chapter_number.toString()) : 0 }}</p>
+                <p class="font-bold text-2xl md:text-3xl">#{{ item.chapter_number !== null ?
+                  parseInt(item.chapter_number.toString()) : 0 }}</p>
                 <p class="text-xs font-semibold uppercase">Latest Chapter</p>
               </div>
               <NuxtLink :to="`/manga/30`" class="ml-4">
@@ -45,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { capitalizeEachWord } from '~/server/utils/capitalizeEachWord';
+import { capitalizeEachWord } from '~/utils/capitalizeEachWord';
 interface Genre {
   id: number;
   name: string;

@@ -1,8 +1,6 @@
 <template>
   <UApp>
-    <ClientOnly>
-      <Navbar v-if="!['/login', '/register'].includes(route.path)" />
-    </ClientOnly>
+    <Navbar v-if="!['/login', '/register'].includes(route.path)" />
     <NuxtPage />
     <Footer v-if="!['/login', '/register'].includes(route.path)" class="mt-[10rem]" />
   </UApp>

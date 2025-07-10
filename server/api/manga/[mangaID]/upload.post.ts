@@ -1,6 +1,6 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 import { v4 } from "uuid";
-import { db } from "~/server/utils/db";
+import { db } from "~/utils/db";
 
 export default defineEventHandler(async (event) => {
   const mangaID = getRouterParam(event, "mangaID");
@@ -51,7 +51,10 @@ export default defineEventHandler(async (event) => {
       await blockBlobClient.uploadData(file.data, {
         blobHTTPHeaders: { blobContentType: file.type },
       });
-      return { page_number: index + 1, link: `${cdnURL}/${containerName}/${blobName}` };
+      return {
+        page_number: index + 1,
+        link: `${cdnURL}/${containerName}/${blobName}`,
+      };
     });
 
     const uploadedImages = await Promise.all(uploadPromises);

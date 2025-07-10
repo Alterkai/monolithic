@@ -1,3 +1,5 @@
+import { db } from "~/utils/db";
+
 export default defineEventHandler(async (event) => {
   let manga_id = getRouterParam(event, 'mangaID') as string | undefined;
 

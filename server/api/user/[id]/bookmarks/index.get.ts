@@ -1,14 +1,17 @@
 // URL: /api/user/bookmarks
-import { db } from '~/server/utils/db';
+import { db } from "~/utils/db";
 
 export default defineEventHandler(async (event) => {
-  let id = getRouterParam(event, 'id') as string | undefined;
-  
+  let id = getRouterParam(event, "id") as string | undefined;
+
   try {
-    const result = await db.query(`
+    const result = await db.query(
+      `
       SELECT * FROM bookmark_with_manga
       WHERE user_id = $1
-      `, [id]);
+      `,
+      [id]
+    );
     if (result.rows.length === 0) {
       throw createError({
         statusCode: 404,
@@ -23,4 +26,4 @@ export default defineEventHandler(async (event) => {
       message: "Internal Server Error",
     });
   }
-})
+});

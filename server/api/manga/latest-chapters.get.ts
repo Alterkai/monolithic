@@ -1,4 +1,4 @@
-import { db } from "~/server/utils/db";
+import { db } from "~/utils/db";
 
 export default defineEventHandler(async (event) => {
   const result = await db.query(
@@ -17,4 +17,4 @@ export default defineEventHandler(async (event) => {
   }
 
   return result.rows;
-})
+});

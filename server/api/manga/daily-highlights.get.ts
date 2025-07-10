@@ -1,4 +1,4 @@
-import { db } from '~/server/utils/db';
+import { db } from "~/utils/db";
 
 export default defineEventHandler(async (event) => {
   const result = await db.query(`
@@ -11,10 +11,10 @@ export default defineEventHandler(async (event) => {
     ORDER BY
         daily_sort_key
     LIMIT 5;`);
-  
+
   if (!result || result.rows.length === 0) {
     return [];
   }
 
-  return result.rows
-})
+  return result.rows;
+});

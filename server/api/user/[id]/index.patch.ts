@@ -1,11 +1,11 @@
-import { db } from '~/server/utils/db';
+import { db } from "~/utils/db";
 
 export default defineEventHandler(async (event) => {
   // Validate access roles
   // Only allow access to role "Admin"
   // Already handled in middleware/admin.ts
-  
-  let userID = getRouterParam(event, 'id') as string | undefined;
+
+  let userID = getRouterParam(event, "id") as string | undefined;
   const body = await readBody(event);
   const { username, name, avatar, role } = body;
 
@@ -15,13 +15,13 @@ export default defineEventHandler(async (event) => {
     SELECT id FROM users
     WHERE id = $1`,
     [userID]
-  )
+  );
   if (userCheck.rows.length === 0) {
     throw createError({
       statusCode: 404,
-      message: 'User not found',
+      message: "User not found",
     });
-  } 
+  }
 
   // --- 1. Change User Role ---
   if (role) {
@@ -48,4 +48,4 @@ export default defineEventHandler(async (event) => {
       [name, userID]
     );
   }
-})
+});

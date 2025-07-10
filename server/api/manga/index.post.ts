@@ -1,4 +1,4 @@
-import { db } from "~/server/utils/db";
+import { db } from "~/utils/db";
 import path from "path";
 import { randomUUID } from "crypto";
 import { BlobServiceClient } from "@azure/storage-blob";

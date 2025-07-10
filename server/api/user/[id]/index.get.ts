@@ -1,9 +1,9 @@
-import { db } from '~/server/utils/db';
-import jwt from 'jsonwebtoken';
-import { User } from '~/types/database';
+import { db } from "~/utils/db";
+import jwt from "jsonwebtoken";
+import { User } from "~/types/database";
 
 export default defineEventHandler(async (event) => {
-  let id = getRouterParam(event, 'id') as string | undefined;
+  let id = getRouterParam(event, "id") as string | undefined;
   let user: User;
 
   // Get Current User Profile

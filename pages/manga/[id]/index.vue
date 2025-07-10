@@ -57,23 +57,30 @@
             Read
           </UButton>
 
-          <UButton color="secondary" variant="outline" icon="i-lucide-book-marked" size="xl">
-            Bookmark
-          </UButton>
+          <ClientOnly v-if="isLoggedIn">
+            <UButton v-if="!isBookmarked" @click="addBookmark()" color="secondary" variant="outline"
+              icon="i-lucide-book-marked" size="xl">
+              Bookmark
+            </UButton>
+            <UButton v-else color="secondary" variant="soft"
+              icon="i-lucide-book-marked" size="xl">
+              Saved
+            </UButton>
 
-          <UButton @click="navigateTo(`/admin/addChapter?m_id=${route.params.id}`)" v-if="isAdmin" color="neutral"
-            variant="subtle" icon="i-lucide-file-plus-2" size="xl">
-            Add Chapter
-          </UButton>
+            <UButton @click="navigateTo(`/admin/addChapter?m_id=${route.params.id}`)" v-if="isAdmin" color="neutral"
+              variant="subtle" icon="i-lucide-file-plus-2" size="xl">
+              Add Chapter
+            </UButton>
+          </ClientOnly>
         </div>
 
         <!-- GENRES -->
         <div class="flex flex-row gap-2 mt-4">
           <span v-for="genre in mangaDetails.genre" class="font-semibold text-sm">
-            <span v-if="genre == 'yuri'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
+            <span v-if="genre == 'yuri' || genre == 'smut'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
               capitalizeEachWord(genre) }}</span>
             <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre)
-            }}</span>
+              }}</span>
           </span>
         </div>
 
@@ -86,11 +93,12 @@
       <div v-if="mangaDetails.chapters.length === 0" class="text-center text-current/60">
         No chapters available for this manga.
       </div>
-      <div v-for="chapter in mangaDetails.chapters" :key="chapter.number" class="flex">
+      <div v-for="chapter in sortedChapters" :key="chapter.number" class="flex">
         <NuxtLink
           class="dark:hover:bg-slate-800 light:hover:bg-slate-300 outline outline-current/40 transition ease-in p-2 rounded-md font-semibold w-full"
+          :class="{ 'text-current/60 dark:text-slate-400 light:text-slate-500': chapter.number <= lastRead }"
           :to="`/manga/${mangaDetails.id}/chapter/${chapter.number}`">
-          Chapter {{ chapter.number }} - {{ chapter.name }}
+          Ch. {{ chapter.number }} {{ chapter.name ? `- ${chapter.name}` : '' }}
           <p class="text-sm font-light">{{ timeAgo(chapter.date_added) }}</p>
         </NuxtLink>
       </div>
@@ -104,23 +112,27 @@
   </div>
 </template>
 
-<style scoped></style>
-
 <script setup lang="ts">
-import { timeAgo } from '~/server/utils/format'
+import { timeAgo } from '~/utils/format'
 import type { Chapter } from '@/types/database'
-import { capitalizeEachWord } from '@/server/utils/capitalizeEachWord'
+import { capitalizeEachWord } from '~/utils/capitalizeEachWord'
 
 const authStore = useAuthStore();
+const lastReadStore = useLastReadStore();
+const route = useRoute();
+const manga_id = route.params.id as string;
+const toast = useToast();
+const isLoggedIn = computed(() => authStore.isLoggedIn);
+const userId = authStore.user?.id;
+
+const isBookmarked = ref(false);
+const lastRead = ref(1);
 
 // Buat sekarang upload chapter cuman boleh sama admin
 const isAdmin = computed(() => authStore.user?.roles.includes('Admin'));
 
-const route = useRoute();
-const toast = useToast();
 const parallaxOffset = ref(0);
 const parallaxImage = ref(null);
-const manga_id = route.params.id as string;
 
 interface MangaDetail {
   id: number,
@@ -139,6 +151,61 @@ const { data: mangaDetails, pending, error } = await useAsyncData<MangaDetail>(
   `manga-details-${manga_id}`,
   () => $fetch(`/api/manga/${manga_id}`)
 );
+
+const sortedChapters = computed(() => {
+  if (!mangaDetails.value?.chapters) {
+    return [];
+  }
+  return [...mangaDetails.value.chapters].sort((a, b) => b.number - a.number);
+});
+
+async function addBookmark() {
+  try {
+    if (!mangaDetails.value || !userId) {
+      toast.add({
+        title: 'Error',
+        description: 'Not Logged In.',
+        color: 'error',
+        duration: 5000
+      });
+      return;
+    }
+    await $fetch(`/api/user/${userId}/bookmarks`, {
+      method: 'POST',
+      body: {
+        manga_id: mangaDetails.value.id,
+        last_read_chapter_id: lastRead.value
+      }
+    })
+    fetchIsBookmarked();
+    toast.add({
+      title: 'Success',
+      description: 'Bookmark added successfully.',
+      color: 'success',
+      duration: 5000
+    });
+  } catch (error) {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to add bookmark.',
+      color: 'error',
+      duration: 5000
+    });
+  }
+}
+
+async function fetchIsBookmarked() {
+  if (!userId) {
+    return false;
+  }
+  try {
+    const response = await $fetch(`/api/user/${userId}/bookmarks/${manga_id}`);
+    isBookmarked.value = true;
+  } catch (error) {
+    console.error('Error checking bookmark:', error);
+    return isBookmarked.value = false;
+  }
+}
 
 // Handle potential errors from the fetch operation
 if (error.value) {
@@ -160,6 +227,8 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
+  fetchIsBookmarked();
+  lastRead.value = lastReadStore.getLastRead(parseInt(manga_id));
   window.addEventListener('scroll', handleScroll);
 })
 

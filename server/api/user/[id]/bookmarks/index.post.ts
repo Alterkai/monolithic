@@ -1,31 +1,37 @@
-import { db } from '~/server/utils/db';
-import { useAuthStore } from '~/stores/auth';
+import { db } from "~/utils/db";
+import getUserId from "~/utils/getUserId";
 
 export default defineEventHandler(async (event) => {
   // Assuming the user is already authenticated
   // Auth is handled in the middleware
-  const authStore = useAuthStore();
-  const user_id = authStore.user?.id;
   
+  const user_id = getUserId(getCookie(event, 'auth-token') || null)
   const body = await readBody(event);
-  let { manga_id } = body;
+  let { manga_id, last_read_chapter_id } = body;
 
-  if (!manga_id || !user_id) {
+  if (!manga_id || !user_id || !last_read_chapter_id) {
     throw createError({
       statusCode: 400,
-      message: 'Manga ID and User ID are required',
+      message: "Manga ID and User ID are required",
     });
   }
 
   try {
-    const result = await db.query(`
-      INSERT INTO 
-      `)
+    const result = await db.query(
+      `
+      INSERT INTO bookmark (user_id, manga_id, last_read_chapter_id)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (user_id, manga_id) DO UPDATE SET
+          last_read_chapter_id = EXCLUDED.last_read_chapter_id,
+          date_added = NOW();
+      `,
+      [user_id, manga_id, last_read_chapter_id]
+    );
   } catch (error) {
-    console.error('Error processing bookmark request:', error);
+    console.error("Error processing bookmark request:", error);
     throw createError({
       statusCode: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
     });
   }
-})
+});
