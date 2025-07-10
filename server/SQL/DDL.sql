@@ -230,9 +230,8 @@ SELECT
                 'number', c.number,
                 'name', c.name,
                 'date_added', c.date_added,
-                'views', cv.total_views,
-            )
-            ORDER BY c.number ASC
+                'views', cv.total_views
+            ) ORDER BY c.number ASC
         ) FILTER (WHERE c.ID IS NOT NULL),
         '[]'::JSONB
     ) AS chapters
