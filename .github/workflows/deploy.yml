@@ -26,7 +26,7 @@ jobs:
 
       - name: Prepare deployment package
         # Arsipkan file produksi, dan kecualikan direktori node_modules di dalam .output
-        run: tar --exclude='.output/server/node_modules' -czvf deploy.tar.gz .output package.json server/sql
+        run: tar --exclude='.output/server/node_modules' -czvf deploy.tar.gz .output package.json server/SQL
 
       - name: Deploy package to VPS
         # Gunakan scp-action untuk MENDORONG file ke VPS. Ini lebih andal.
