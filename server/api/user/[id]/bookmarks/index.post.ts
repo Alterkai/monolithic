@@ -1,11 +1,11 @@
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 import getUserId from "~/utils/getUserId";
 
 export default defineEventHandler(async (event) => {
   // Assuming the user is already authenticated
   // Auth is handled in the middleware
-  
-  const user_id = getUserId(getCookie(event, 'auth-token') || null)
+
+  const user_id = getUserId(getCookie(event, "auth-token") || null);
   const body = await readBody(event);
   let { manga_id, last_read_chapter_id } = body;
 

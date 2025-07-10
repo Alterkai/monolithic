@@ -1,5 +1,5 @@
 // Manga Query (no ID provided, no need to retrieve genres?)
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 import validator from "validator";
 
 export default defineEventHandler(async (event) => {

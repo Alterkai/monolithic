@@ -1,5 +1,5 @@
 // URL: /api/user/bookmarks
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 
 export default defineEventHandler(async (event) => {
   let id = getRouterParam(event, "id") as string | undefined;

@@ -1,4 +1,4 @@
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 import validator from "validator";
 import * as argon2 from "argon2";
 import jwt from "jsonwebtoken";
@@ -83,7 +83,13 @@ export default defineEventHandler(async (event) => {
       roles: role,
     };
     const JWT_SECRET =
-      process.env.JWT_SECRET || `secretgoeshere,butthisshouldbechanged>:(`;
+      process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      throw createError({
+        statusCode: 500,
+        message: "JWT secret is not defined",
+      });
+    }
     const token = jwt.sign(payload, JWT_SECRET, {
       expiresIn: "3d", // 3 days
     });

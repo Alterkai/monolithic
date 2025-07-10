@@ -1,4 +1,4 @@
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 
 export default defineEventHandler(async (event) => {
   const mangaID = getRouterParam(event, "mangaID") as string | undefined;
@@ -35,4 +35,4 @@ export default defineEventHandler(async (event) => {
       message: "Internal Server Error",
     });
   }
-})
+});

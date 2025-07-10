@@ -8,4 +8,17 @@
 
 <script setup>
 const route = useRoute();
+const authStore = useAuthStore();
+
+onMounted(async () => {
+  if (authStore.isLoggedIn) {
+    try {
+      await $fetch('/api/auth/me', {
+        method: 'GET'
+      })
+    } catch (error) {
+      authStore.logOut();
+    }
+  }
+})
 </script>

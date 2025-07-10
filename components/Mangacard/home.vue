@@ -1,6 +1,6 @@
 <template>
   <!-- Manga Card Container -->
-  <div class="w-48 group cursor-pointer flex flex-col rounded-md overflow-hidden">
+  <div class="w-48 group cursor-pointer flex flex-col rounded-md overflow-hidden dark:outline dark:outline-(--ui-text)/20 light:bg-slate-200">
     <!-- Manga Cover Wrapper -->
     <div class="relative w-full aspect-[2/3] overflow-hidden">
       <!-- Update Badge -->
@@ -22,11 +22,11 @@
     </div>
 
     <!-- Chapter Information -->
-    <div class="p-2 flex-grow dark:bg-gray-800 light:bg-current">
-      <p class="font-semibold text-sm text-gray-200 truncate">
+    <div class="p-2 flex-grow">
+      <p class="font-semibold text-sm truncate">
         Ch. {{ parseInt(data.chapter_number) ? parseInt(data.chapter_number) : 0 }}
       </p>
-      <p class="text-xs light:text-gray-300 dark:text-gray-400">
+      <p class="text-xs">
         {{ timeAgo(data.chapter_date_added) ? timeAgo(data.chapter_date_added) : 'Unknown Date' }}
       </p>
     </div>

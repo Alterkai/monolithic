@@ -1,4 +1,4 @@
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 import validator from "validator";
 import * as argon2 from "argon2";
 

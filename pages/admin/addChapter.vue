@@ -34,7 +34,7 @@
         </UFormField>
 
         <!-- Image Previews and Progress Bars -->
-        <div v-if="imagePreviews.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+        <div v-if="imagePreviews.length > 0" class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4 mt-4">
           <div v-for="(img, index) in imagePreviews" :key="index"
             class="relative border rounded-lg p-2 flex flex-col gap-2">
             <!-- Delete Button -->
@@ -49,9 +49,24 @@
           </div>
         </div>
 
-        <UButton @click="submitChapter" :loading="isUploading" label="Add Chapter" />
+        <div>
+          <UButton size="lg" class="text-center" @click="submitChapter" :loading="isUploading" label="Upload" />
+        </div>
       </UForm>
     </div>
+
+    <!-- Global Progress Bar -->
+    <div v-if="isProcessing"
+      class="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-800 p-4 shadow-lg border-t border-gray-200 dark:border-gray-700 z-50 transition-transform duration-300">
+      <div class="container mx-auto">
+        <div class="flex justify-between items-center mb-2">
+          <p class="text-sm font-medium">{{ processingStatusText }}</p>
+          <p class="text-sm font-mono">{{ Math.round(overallProgress) }}%</p>
+        </div>
+        <UProgress :value="overallProgress" />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -63,6 +78,9 @@ const route = useRoute();
 const mangaID = route.query.m_id as string;
 const isLoading = ref(false);
 const isUploading = ref(false);
+const isProcessing = ref(false); // State for
+const overallProgress = ref(0); // State for global progress value
+const processingStatusText = ref(''); // State for global progress text
 
 const state = reactive({
   mangaID: {
@@ -178,6 +196,19 @@ watch(() => state.mangaID.id, async (newMangaID) => {
   }
 });
 
+
+const imagePreviews = ref<ImagePreview[]>([]);
+
+// Watch for changes in individual image progresses to update the overall progress
+watchEffect(() => {
+  if (imagePreviews.value.length === 0) {
+    overallProgress.value = 0;
+    return;
+  }
+  const totalProgress = imagePreviews.value.reduce((sum, img) => sum + img.progress, 0);
+  overallProgress.value = totalProgress / imagePreviews.value.length;
+});
+
 onMounted(() => {
   fetchAllManga();
   if (mangaID) fetchMangaDetails(mangaID.toString())
@@ -191,8 +222,6 @@ interface ImagePreview {
   compressedFile: File | null;
   uploadedUrl?: string;
 }
-
-const imagePreviews = ref<ImagePreview[]>([]);
 
 function removeImage(index: number) {
   const imageToRemove = imagePreviews.value[index];
@@ -275,13 +304,16 @@ async function handleFileChange(event: Event) {
   const files = target.files;
   if (!files) return;
 
-  // 1. Reset state
+  // 1. Reset state and START global processing
+  isProcessing.value = true;
+  processingStatusText.value = 'Preparing images...';
   isUploading.value = false;
   imagePreviews.value.forEach(img => URL.revokeObjectURL(img.previewUrl));
   imagePreviews.value = [];
 
   // 2. Process slicing first
   const allFilesToCompress: File[] = [];
+  processingStatusText.value = 'Slicing long images...';
   toast.add({ id: 'processing', title: 'Processing images...', description: 'Slicing long images if necessary.' });
 
   const processingPromises = Array.from(files).map(async (file) => {
@@ -297,6 +329,7 @@ async function handleFileChange(event: Event) {
   toast.remove('processing');
 
   // 3. Now, compress all resulting files (original or sliced)
+  processingStatusText.value = 'Compressing images...';
   const compressionPromises = allFilesToCompress.map(async (file, index) => {
     const preview: ImagePreview = {
       name: file.name,
@@ -341,6 +374,9 @@ async function handleFileChange(event: Event) {
   // Sort the previews for the UI as soon as they are all processed
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
   imagePreviews.value.sort((a, b) => collator.compare(a.name, b.name));
+
+  // END global processing
+  isProcessing.value = false;
 }
 
 async function submitChapter() {

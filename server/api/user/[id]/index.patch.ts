@@ -1,4 +1,4 @@
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 
 export default defineEventHandler(async (event) => {
   // Validate access roles

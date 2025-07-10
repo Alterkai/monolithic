@@ -10,7 +10,7 @@
       <!-- Main Content -->
       <div class="relative z-10 h-full flex flex-col justify-end">
         <div class="container w-full p-4 md:p-6">
-          <div class="flex flex-col md:flex-row items-stretch gap-0">
+          <div class="flex flex-col md:flex-row items-stretch justify-center gap-0">
 
             <!-- Left Section: Title & Genres -->
             <div

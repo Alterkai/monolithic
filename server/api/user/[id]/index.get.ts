@@ -1,4 +1,4 @@
-import { db } from "~/utils/db";
+import { db } from "~/server/utils/db";
 import jwt from "jsonwebtoken";
 import { User } from "~/types/database";
 

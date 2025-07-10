@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-2 bg-accented">
+  <div class="flex flex-col gap-2 bg-accented h-[20rem]">
     <div v-if="isLoading">
 
     </div>

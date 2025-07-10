@@ -34,6 +34,8 @@
 import { useAuthStore } from '@/stores/auth';
 import * as z from 'zod';
 
+const redirect = useRoute().query.redirect as string | undefined;
+
 interface LoginResponse {
   success: boolean;
   message: string;
@@ -78,7 +80,8 @@ async function onSubmit() {
 
     if (response && response.user) {
       authStore.setUser({ ...response.user, id: String(response.user.id) });
-      navigateTo('/');
+      if (redirect) navigateTo(redirect);
+      else navigateTo('/');
     }
   } catch (error) {
     toast.add({

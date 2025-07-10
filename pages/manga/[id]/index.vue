@@ -36,7 +36,7 @@
         <div class="flex flex-row gap-4 font-semibold">
           <div class="flex flex-row items-center gap-2">
             <UIcon name="i-lucide-eye" class="size-5" />
-            <span class="text-sm">x Views</span>
+            <span class="text-sm">{{ mangaViews }} Views</span>
           </div>
 
           <div class="flex flex-row items-center gap-2">
@@ -62,8 +62,7 @@
               icon="i-lucide-book-marked" size="xl">
               Bookmark
             </UButton>
-            <UButton v-else color="secondary" variant="soft"
-              icon="i-lucide-book-marked" size="xl">
+            <UButton v-else color="secondary" variant="soft" icon="i-lucide-book-marked" size="xl">
               Saved
             </UButton>
 
@@ -98,8 +97,16 @@
           class="dark:hover:bg-slate-800 light:hover:bg-slate-300 outline outline-current/40 transition ease-in p-2 rounded-md font-semibold w-full"
           :class="{ 'text-current/60 dark:text-slate-400 light:text-slate-500': chapter.number <= lastRead }"
           :to="`/manga/${mangaDetails.id}/chapter/${chapter.number}`">
-          Ch. {{ chapter.number }} {{ chapter.name ? `- ${chapter.name}` : '' }}
-          <p class="text-sm font-light">{{ timeAgo(chapter.date_added) }}</p>
+          <div class="flex justify-between items-center">
+            <div>
+              Ch. {{ chapter.number }} {{ chapter.name ? `- ${chapter.name}` : '' }}
+              <p class="text-sm font-light">{{ timeAgo(chapter.date_added) }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <UIcon name="i-lucide-eye" class="size-4" />
+              {{ chapter.views }}
+            </div>
+          </div>
         </NuxtLink>
       </div>
     </div>
@@ -114,7 +121,6 @@
 
 <script setup lang="ts">
 import { timeAgo } from '~/utils/format'
-import type { Chapter } from '@/types/database'
 import { capitalizeEachWord } from '~/utils/capitalizeEachWord'
 
 const authStore = useAuthStore();
@@ -134,6 +140,13 @@ const isAdmin = computed(() => authStore.user?.roles.includes('Admin'));
 const parallaxOffset = ref(0);
 const parallaxImage = ref(null);
 
+interface Chapter {
+  number: number,
+  name: string,
+  date_added: Date,
+  views: number
+}
+
 interface MangaDetail {
   id: number,
   title: string,
@@ -146,11 +159,29 @@ interface MangaDetail {
   author: string,
 }
 
+interface MangaFetchData {
+  mangaDetails: MangaDetail;
+  total_views: number;
+}
+
+interface MangaViewsResponse {
+  total_views: number;
+}
+
 // Fetch data using useAsyncData
-const { data: mangaDetails, pending, error } = await useAsyncData<MangaDetail>(
-  `manga-details-${manga_id}`,
-  () => $fetch(`/api/manga/${manga_id}`)
-);
+const { data, pending, error } = await useAsyncData<MangaFetchData>(async () => {
+  const [mangaDetails, mangaViews] = await Promise.all([
+    $fetch<MangaDetail>(`/api/manga/${manga_id}`),
+    $fetch<MangaViewsResponse>(`/api/views/${manga_id}`)
+  ]);
+  return {
+    mangaDetails,
+    total_views: mangaViews.total_views
+  };
+});
+
+const mangaDetails = computed(() => data.value?.mangaDetails);
+const mangaViews = computed(() => data.value?.total_views);
 
 const sortedChapters = computed(() => {
   if (!mangaDetails.value?.chapters) {
@@ -199,11 +230,21 @@ async function fetchIsBookmarked() {
     return false;
   }
   try {
-    const response = await $fetch(`/api/user/${userId}/bookmarks/${manga_id}`);
+    await $fetch(`/api/user/${userId}/bookmarks/${manga_id}`);
     isBookmarked.value = true;
   } catch (error) {
     console.error('Error checking bookmark:', error);
     return isBookmarked.value = false;
+  }
+}
+
+async function addMangaView() {
+  try {
+    await $fetch(`/api/views/${manga_id}`, {
+      method: 'POST'
+    });
+  } catch (error) {
+    
   }
 }
 
@@ -227,6 +268,7 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
+  addMangaView();
   fetchIsBookmarked();
   lastRead.value = lastReadStore.getLastRead(parseInt(manga_id));
   window.addEventListener('scroll', handleScroll);

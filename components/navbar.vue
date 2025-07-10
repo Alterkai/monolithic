@@ -7,8 +7,9 @@
       <!-- SEARCH BUTTON -->
       <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center' }">
         <!-- BUTTON -->
-        <UButton icon="i-lucide-search" variant="ghost" color="neutral" class="min-md:hidden" />
-        <UButton icon="i-lucide-search" variant="outline" color="neutral" class="max-md:hidden min-w-[10rem]">Search...
+        <UButton icon="i-lucide-search" color="neutral" variant="outline"
+          class="md:min-w-[10rem]">
+          <span class="hidden md:inline">Search...</span>
         </UButton>
 
 

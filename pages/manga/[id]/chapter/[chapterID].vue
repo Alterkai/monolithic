@@ -13,7 +13,7 @@
     <!-- Content -->
     <div v-else-if="chapterData">
       <div class="my-4">
-        <h1 class="text-2xl font-bold">{{ chapterData.title }}</h1>
+        <NuxtLink class="text-2xl font-bold" :to="`/manga/${mangaID}`">{{ chapterData.title }}</NuxtLink>
         <p class="text-sm font-current/60">{{ `Chapter ${parseInt(chapterData.chapter.toString())}` }}</p>
         <UButton class="mt-2" variant="subtle" @click="isLongstrip = !isLongstrip">{{ isLongstrip ? "Horizontal View" : "Vertical View"}}</UButton>
       </div>
@@ -57,6 +57,16 @@ const { data: chapterData, pending, error } = await useAsyncData<ChapterData>(
   () => $fetch(`/api/manga/${mangaID}/${chapterID}`)
 );
 
+async function addView() {
+  try {
+    await $fetch(`/api/views/${mangaID}/${chapterID}`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    
+  }
+}
+
 if (error.value) {
   toast.add({
     title: 'Error fetching chapter data',
@@ -67,6 +77,7 @@ if (error.value) {
 }
 
 onMounted(() => {
+  addView();
   lastReadStore.setLastRead(parseInt(mangaID), parseInt(chapterID))
 })
 </script>
