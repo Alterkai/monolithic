@@ -26,7 +26,7 @@ jobs:
 
       - name: Prepare deployment package
         # Arsipkan file produksi, dan kecualikan direktori node_modules di dalam .output
-        run: tar --exclude='.output/server/node_modules' -czvf deploy.tar.gz .output package.json
+        run: tar --exclude='.output/server/node_modules' -czvf deploy.tar.gz .output package.json server/sql
 
       - name: Deploy package to VPS
         # Gunakan scp-action untuk MENDORONG file ke VPS. Ini lebih andal.
@@ -58,6 +58,6 @@ jobs:
 
             # Restart aplikasi dengan PM2.
             # Menggunakan path langsung ke file server lebih baik daripada 'npm start'
-            pm2 restart ${{ secrets.APP_PROCESS_NAME }} || pm2 start .output/server/index.mjs --name ${{ secrets.APP_PROCESS_NAME }}
+            pm2 reload ecosystem.config.js
 
             echo "Deployment successful!"
