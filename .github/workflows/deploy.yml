@@ -27,7 +27,7 @@ jobs:
       - name: Archive build artifacts
         # Mengarsipkan folder 'dist' (atau 'build') yang dihasilkan oleh npm run build
         # Sesuaikan 'dist' jika folder build Anda bernama lain
-        run: tar -czvf build-artifact.tar.gz dist package.json # Tambahkan file/folder lain yang diperlukan
+        run: tar -czvf build-artifact.tar.gz .output package.json # Tambahkan file/folder lain yang diperlukan
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.1
@@ -44,7 +44,7 @@ jobs:
 
             # Hapus file lama (opsional, tergantung strategi deployment Anda)
             # Hati-hati dengan perintah rm -rf!
-            rm -rf dist node_modules package.json # Sesuaikan dengan apa yang Anda hapus
+            rm -rf .output package.json # Sesuaikan dengan apa yang Anda hapus
 
             # Mengirim artifact build dari GitHub Actions ke VPS
             # Menggunakan pipe untuk langsung mengirim dari runner ke VPS
