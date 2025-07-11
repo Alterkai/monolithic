@@ -40,7 +40,17 @@ async function flushSingleMangaView(mangaId: number) {
   }
 
   const redisKey = REDIS_MANGA_VIEW_KEY_PREFIX + mangaId;
-  const pendingCountStr = await redis.getdel(redisKey);
+  // const pendingCountStr = await redis.getdel(redisKey); // GETDEL requires Redis 6.2+
+  // Gunakan transaksi MULTI/EXEC untuk kompatibilitas dengan Redis versi lama.
+  const transactionResult = await redis
+    .multi()
+    .get(redisKey)
+    .del(redisKey)
+    .exec();
+  // Hasil transaksi adalah array dari [error, result]. Kita ambil hasil dari perintah GET (pertama).
+  const pendingCountStr = transactionResult
+    ? (transactionResult[0][1] as string)
+    : null;
   const pendingCount = pendingCountStr ? parseInt(pendingCountStr, 10) : 0;
 
   if (pendingCount > 0) {
@@ -95,7 +105,17 @@ async function flushSingleChapterView(mangaId: number, chapterId: number) {
   }
 
   const redisKey = `${REDIS_CHAPTER_VIEW_KEY_PREFIX}${mangaId}:${chapterId}`;
-  const pendingCountStr = await redis.getdel(redisKey);
+  // const pendingCountStr = await redis.getdel(redisKey); // GETDEL requires Redis 6.2+
+  // Gunakan transaksi MULTI/EXEC untuk kompatibilitas dengan Redis versi lama.
+  const transactionResult = await redis
+    .multi()
+    .get(redisKey)
+    .del(redisKey)
+    .exec();
+  // Hasil transaksi adalah array dari [error, result]. Kita ambil hasil dari perintah GET (pertama).
+  const pendingCountStr = transactionResult
+    ? (transactionResult[0][1] as string)
+    : null;
   const pendingCount = pendingCountStr ? parseInt(pendingCountStr, 10) : 0;
 
   if (pendingCount > 0) {
