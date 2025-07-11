@@ -47,7 +47,7 @@
         </div>
 
         <div class="flex">
-          <UButton type="submit" class="mt-4 flex">Add Manga</UButton>
+          <UButton loading-auto type="submit" class="mt-4 flex">Add Manga</UButton>
         </div>
       </UForm>
     </div>
@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 
+const isLoading = ref(false);
 const toast = useToast();
 const state = reactive({
   title: '',
@@ -86,6 +87,7 @@ const handleFileUpload = (event: Event) => {
 
 const onSubmit = async () => {
   try {
+    isLoading.value = true;
     const formData = new FormData();
     formData.append('title', state.title);
     formData.append('original_title', state.original_title);
@@ -126,6 +128,8 @@ const onSubmit = async () => {
       color: 'error',
       duration: 5000
     });
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>

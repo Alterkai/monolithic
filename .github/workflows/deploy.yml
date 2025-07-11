@@ -46,6 +46,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Keluar jika ada yang error
+            set -e
+
             # Pindah ke direktori aplikasi
             cd ${{ secrets.APP_DIR_ON_VPS }}
 
@@ -57,7 +60,6 @@ jobs:
             npm install --production
 
             # Restart aplikasi dengan PM2.
-            # Menggunakan path langsung ke file server lebih baik daripada 'npm start'
-            pm2 reload ecosystem.config.js
+            pm2 reload ecosystem.config.cjs
 
             echo "Deployment successful!"
