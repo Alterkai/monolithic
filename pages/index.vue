@@ -32,10 +32,10 @@
       </div>
     </div>
 
-    <!-- SOCIAL MEDIA -->
+    <!-- RIGHT SECTION -->
     <div class="min-lg:w-[40%]">
-      <h2 class="font-semibold text-2xl">Social Media</h2>
-      awda
+      <h2 class="font-semibold text-2xl"></h2>
+      
     </div>
   </div>
 </template>
