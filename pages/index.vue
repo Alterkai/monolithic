@@ -21,7 +21,7 @@
       </div>
 
       <div v-else-if="data?.latestManga">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
           <NuxtLink v-for="manga in data.latestManga" :key="manga.manga_id" :to="`/manga/${manga.manga_id}`">
             <MangacardHome :data="manga" />
           </NuxtLink>
@@ -33,8 +33,9 @@
     </div>
 
     <!-- SOCIAL MEDIA -->
-    <div class="">
+    <div class="min-lg:w-[40%]">
       <h2 class="font-semibold text-2xl">Social Media</h2>
+      awda
     </div>
   </div>
 </template>

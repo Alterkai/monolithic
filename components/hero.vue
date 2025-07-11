@@ -34,7 +34,7 @@
                   parseInt(item.chapter_number.toString()) : 0 }}</p>
                 <p class="text-xs font-semibold uppercase">Latest Chapter</p>
               </div>
-              <NuxtLink :to="`/manga/30`" class="ml-4">
+              <NuxtLink :to="`/manga/${item.manga_id}`" class="ml-4">
                 <UButton icon="i-lucide-book-open" size="lg" color="neutral" variant="solid">
                   Read Now
                 </UButton>

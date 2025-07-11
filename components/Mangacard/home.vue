@@ -1,6 +1,6 @@
 <template>
   <!-- Manga Card Container -->
-  <div class="w-48 group cursor-pointer flex flex-col rounded-md overflow-hidden dark:outline dark:outline-(--ui-text)/20 light:bg-slate-200">
+  <div class="w-auto group cursor-pointer flex flex-col rounded-md overflow-hidden dark:outline dark:outline-(--ui-text)/20 light:bg-slate-200">
     <!-- Manga Cover Wrapper -->
     <div class="relative w-full aspect-[2/3] overflow-hidden">
       <!-- Update Badge -->
