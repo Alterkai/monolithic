@@ -1,6 +1,6 @@
 <template>
   <!-- BACK IMAGE -->
-  <div class="h-[20rem] overflow-hidden -z-10 relative">
+  <div class="h-[10rem] min-lg:h-[20rem] overflow-hidden -z-10 relative">
     <USkeleton v-if="pending" class="w-full h-full" />
     <NuxtImg v-else ref="parallaxImage" class="w-full object-cover opacity-30 blur-sm select-none inset-0"
       :src="mangaDetails?.cover" :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">

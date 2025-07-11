@@ -17,7 +17,12 @@ export default defineNuxtConfig({
   image: {
     domains: [
       'cdn2.alterkaiscans.my.id'
-    ]
+    ],
+    alias: {
+      cdn2: 'https://cdn2.alterkaiscans.my.id',
+    },
+    quality: 75,
+    format: ['webp']
   },
   ui: {
     theme: {

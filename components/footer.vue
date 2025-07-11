@@ -45,7 +45,7 @@
     <div class="flex flex-col">
       <USeparator />
       <div class="mt-3">
-        <p class="text-sm text-neutral-500">© 2025 Alterkai. All rights reserved.</p>
+        <!-- <p class="text-sm text-neutral-500">© 2025 Alterkai. All rights reserved.</p> -->
         <p class="text-sm text-neutral-500">Made with ❤️ by
           <ULink to="https://github.com/faralha" target="_blank">
             Faralha
