@@ -5,7 +5,7 @@
       <NuxtImg :src="item.manga_cover" class="absolute w-full h-auto object-cover object-center -z-10"
         alt="Hero background" />
       <!-- Gradient Overlay for Readability -->
-      <div class="absolute inset-0 bg-gradient-to-t " />
+      <!-- <div class="absolute inset-0 bg-gradient-to-t " /> -->
 
       <!-- Main Content -->
       <div class="relative z-10 h-full flex flex-col justify-end">
