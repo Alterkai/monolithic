@@ -56,9 +56,6 @@ jobs:
             tar -xzvf deploy.tar.gz
             rm deploy.tar.gz
 
-            # Install HANYA dependensi produksi
-            npm install --production
-
             # Restart aplikasi dengan PM2.
             pm2 reload ecosystem.config.cjs
 
