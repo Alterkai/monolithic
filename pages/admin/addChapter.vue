@@ -328,48 +328,52 @@ async function handleFileChange(event: Event) {
   await Promise.all(processingPromises);
   toast.remove('processing');
 
-  // 3. Now, compress all resulting files (original or sliced)
-  processingStatusText.value = 'Compressing images...';
-  const compressionPromises = allFilesToCompress.map(async (file, index) => {
-    const preview: ImagePreview = {
-      name: file.name,
-      previewUrl: URL.createObjectURL(file),
-      progress: 0,
-      status: 'compressing',
-      compressedFile: null,
-    };
-    imagePreviews.value.push(preview);
+  // 3. PERBAIKAN: Kompres semua file dalam kelompok (chunks)
+  processingStatusText.value = `Compressing ${allFilesToCompress.length} images...`;
+  const CONCURRENT_LIMIT = 5; // Proses 5 gambar sekaligus
 
-    try {
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-        fileType: 'image/webp',
-        initialQuality: 0.8,
-        onProgress: (p: number) => {
-          // Find the correct preview to update, as index might not match due to async nature
-          const previewToUpdate = imagePreviews.value.find(p => p.previewUrl === preview.previewUrl);
-          if (previewToUpdate) previewToUpdate.progress = p;
-        },
+  for (let i = 0; i < allFilesToCompress.length; i += CONCURRENT_LIMIT) {
+    const chunk = allFilesToCompress.slice(i, i + CONCURRENT_LIMIT);
+    const compressionPromises = chunk.map(async (file) => {
+      const preview: ImagePreview = {
+        name: file.name,
+        previewUrl: URL.createObjectURL(file),
+        progress: 0,
+        status: 'compressing',
+        compressedFile: null,
       };
-      const compressedFile = await imageCompression(file, options);
+      imagePreviews.value.push(preview);
 
-      const previewToUpdate = imagePreviews.value.find(p => p.previewUrl === preview.previewUrl);
-      if (previewToUpdate) {
-        previewToUpdate.compressedFile = compressedFile;
-        previewToUpdate.status = 'compressed';
-        previewToUpdate.progress = 100;
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: 'image/webp',
+          initialQuality: 0.8,
+          onProgress: (p: number) => {
+            const previewToUpdate = imagePreviews.value.find(p => p.previewUrl === preview.previewUrl);
+            if (previewToUpdate) previewToUpdate.progress = p;
+          },
+        };
+        const compressedFile = await imageCompression(file, options);
+
+        const previewToUpdate = imagePreviews.value.find(p => p.previewUrl === preview.previewUrl);
+        if (previewToUpdate) {
+          previewToUpdate.compressedFile = compressedFile;
+          previewToUpdate.status = 'compressed';
+          previewToUpdate.progress = 100;
+        }
+      } catch (error) {
+        console.error('Compression error:', error);
+        const previewToUpdate = imagePreviews.value.find(p => p.previewUrl === preview.previewUrl);
+        if (previewToUpdate) previewToUpdate.status = 'error';
+        toast.add({ title: `Failed to compress ${file.name}`, color: 'error' });
       }
-    } catch (error) {
-      console.error('Compression error:', error);
-      const previewToUpdate = imagePreviews.value.find(p => p.previewUrl === preview.previewUrl);
-      if (previewToUpdate) previewToUpdate.status = 'error';
-      toast.add({ title: `Failed to compress ${file.name}`, color: 'error' });
-    }
-  });
-
-  await Promise.all(compressionPromises);
+    });
+    // Tunggu kelompok saat ini selesai sebelum melanjutkan ke kelompok berikutnya
+    await Promise.all(compressionPromises);
+  }
 
   // Sort the previews for the UI as soon as they are all processed
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
