@@ -6,7 +6,7 @@
       <!-- LOGO -->
       <div class="flex flex-col">
         <div class="flex flex-row items-baseline gap-1">
-          <h1 class="font-bold text-3xl">Alterkai</h1>
+          <h1 class="font-[Boldonse] text-2xl">Alterkai</h1>
           <p class="font-semibold text-primary">v2</p>
         </div>
         <p>Suka komik aneh? Alterkai tempatnya.</p>

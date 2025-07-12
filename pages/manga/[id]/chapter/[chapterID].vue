@@ -15,7 +15,8 @@
       <div class="my-4">
         <NuxtLink class="text-2xl font-bold" :to="`/manga/${mangaID}`">{{ chapterData.title }}</NuxtLink>
         <p class="text-sm font-current/60">{{ `Chapter ${parseInt(chapterData.chapter.toString())}` }}</p>
-        <UButton class="mt-2" variant="subtle" @click="isLongstrip = !isLongstrip">{{ isLongstrip ? "Horizontal View" : "Vertical View"}}</UButton>
+        <UButton class="mt-2" variant="subtle" @click="isLongstrip = !isLongstrip">{{ isLongstrip ? "Horizontal View" :
+          "Vertical View"}}</UButton>
       </div>
 
       <!-- Render Images -->
@@ -24,7 +25,26 @@
         <ViewerHorizontal v-else :data="chapterData.images" />
       </div>
 
-      <CommentsContainer :manga_id="mangaID" :chapter_id="parseInt(chapterID)" />
+      <div class="mt-5">
+        <h2 class="text-xl font-semibold mb-3">Comments</h2>
+        <CommentsContainer :manga_id="mangaID" :chapter_id="parseInt(chapterID)" />
+      </div>
+
+      <!-- Navigation Button -->
+      <Transition name="fade">
+        <div v-show="isNavVisible" class="fixed bottom-5 right-5 z-50 flex gap-2">
+          <!-- Tombol Previous Chapter (hanya muncul jika ada) -->
+          <NuxtLink v-if="chapterData.prevChapter" :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.prevChapter.toString())}`">
+            <UButton variant="subtle" color="neutral" icon="i-lucide-arrow-left" size="lg" />
+          </NuxtLink>
+
+          <!-- Tombol Next Chapter (hanya muncul jika ada) -->
+          <NuxtLink v-if="chapterData.nextChapter" :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.nextChapter.toString())}`">
+            <UButton variant="subtle" color="neutral" icon="i-lucide-arrow-right" size="lg" />
+          </NuxtLink>
+        </div>
+      </Transition>
+
     </div>
   </div>
 </template>
@@ -36,6 +56,10 @@ const mangaID = route.params.id as string;
 const chapterID = route.params.chapterID as string;
 const isLongstrip = ref(true);
 const lastReadStore = useLastReadStore();
+
+const isNavVisible = ref(false);
+const lastScrollY = ref(0);
+let idleTimer: NodeJS.Timeout | null = null;
 
 interface Image {
   id: number;
@@ -49,6 +73,8 @@ interface ChapterData {
   name: string;
   date_added: Date;
   images: Image[];
+  nextChapter: number | null;
+  prevChapter: number | null;
 }
 
 // Fetch data using useAsyncData for SSR and client-side navigation
@@ -76,8 +102,51 @@ if (error.value) {
   });
 }
 
+const handleScroll = () => {
+  if (idleTimer) clearTimeout(idleTimer);
+
+  const currentScrollY = window.scrollY;
+  // Selalu tampilkan tombol jika di paling atas halaman
+  if (currentScrollY <= 100) {
+    isNavVisible.value = true;
+  }
+  // Sembunyikan tombol saat scroll ke bawah
+  else if (currentScrollY > lastScrollY.value) {
+    isNavVisible.value = false;
+  }
+  // Tampilkan tombol saat scroll ke atas
+  else {
+    isNavVisible.value = true;
+  }
+  lastScrollY.value = currentScrollY;
+
+  idleTimer = setTimeout(() => {
+    isNavVisible.value = false;
+  }, 3000);
+};
+
 onMounted(() => {
+  lastScrollY.value = window.scrollY;
+  window.addEventListener('scroll', handleScroll);
+
   addView();
   lastReadStore.setLastRead(parseInt(mangaID), parseInt(chapterID))
 })
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
+
+<style>
+/* CSS for the fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

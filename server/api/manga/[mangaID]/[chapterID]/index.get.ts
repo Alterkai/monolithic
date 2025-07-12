@@ -35,5 +35,7 @@ export default defineEventHandler(async (event) => {
       link: image.link,
       order: image.page_number,
     })),
+    prevChapter: c.prev_chapter || null,
+    nextChapter: c.next_chapter || null,
   };
 })
