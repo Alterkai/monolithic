@@ -12,7 +12,7 @@
     <div class="flex flex-col w-auto max-lg:w-full">
       <h2 class="font-semibold text-2xl mb-5">Latest Projects</h2>
       <div v-if="pending">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
           <div v-for="i in 10" :key="i" class="flex flex-col gap-2">
             <USkeleton class="h-[250px] w-full" />
             <USkeleton class="h-4 w-3/4" />
