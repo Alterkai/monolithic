@@ -255,6 +255,9 @@ SELECT
     c.name AS chapter_name,
     c.date_added AS chapter_date_added,
     c.manga_ID AS chapter_manga_id,
+    -- PERUBAHAN: Gunakan LAG dan LEAD untuk mendapatkan chapter sebelumnya dan berikutnya
+    LAG(c.number, 1) OVER (PARTITION BY c.manga_ID ORDER BY c.number ASC) AS prev_chapter,
+    LEAD(c.number, 1) OVER (PARTITION BY c.manga_ID ORDER BY c.number ASC) AS next_chapter,
     COALESCE(
         JSONB_AGG(
             JSONB_BUILD_OBJECT(
@@ -262,9 +265,9 @@ SELECT
                 'page_number', i.page_number,
                 'link', i.link
             )
-            ORDER BY i.page_number ASC 
+            ORDER BY i.page_number ASC
         ) FILTER (WHERE i.ID IS NOT NULL),
-        '[]'::JSONB 
+        '[]'::JSONB
     ) AS images
 FROM
     chapter c

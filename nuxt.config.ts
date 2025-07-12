@@ -24,6 +24,11 @@ export default defineNuxtConfig({
     quality: 75,
     format: ['webp']
   },
+  fonts: {
+    families: [
+      { name: 'Boldonse', provider: 'google'}
+    ]
+  },
   ui: {
     theme: {
       colors: [

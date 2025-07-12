@@ -1,13 +1,13 @@
 <template>
   <!-- BACK IMAGE -->
-  <div class="h-[10rem] min-lg:h-[20rem] overflow-hidden -z-10 relative">
+  <div class="h-[25rem] min-lg:h-[20rem] overflow-hidden -z-10 relative">
     <USkeleton v-if="pending" class="w-full h-full" />
     <NuxtImg v-else ref="parallaxImage" class="w-full object-cover opacity-30 blur-sm select-none inset-0"
       :src="mangaDetails?.cover" :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">
     </NuxtImg>
   </div>
 
-  <div class="container flex flex-col gap-5 -mt-16 z-10">
+  <div class="container flex flex-col gap-5 -mt-[25rem] min-md:-mt-[7rem] z-10">
     <!-- SKELETON LOADING -->
     <div v-if="pending" class="flex flex-row gap-5">
       <USkeleton class="w-[15rem] h-[20rem] mb-5" />
@@ -53,7 +53,7 @@
 
         <!-- ACTION BUTTONS -->
         <div class="flex flex-row gap-2 mt-2">
-          <UButton color="primary" icon="i-lucide-book-open" size="xl">
+          <UButton color="primary" @click="navigateTo(`/manga/${manga_id}/chapter/${readNow}`)" icon="i-lucide-book-open" size="xl">
             Read
           </UButton>
 
@@ -62,13 +62,18 @@
               icon="i-lucide-book-marked" size="xl">
               Bookmark
             </UButton>
-            <UButton v-else color="secondary" variant="soft" icon="i-lucide-book-marked" size="xl">
+            <UButton v-else color="secondary" @click="removeBookmark()" variant="soft" icon="i-lucide-book-marked" size="xl">
               Saved
             </UButton>
 
             <UButton @click="navigateTo(`/admin/addChapter?m_id=${route.params.id}`)" v-if="isAdmin" color="neutral"
               variant="subtle" icon="i-lucide-file-plus-2" size="xl">
               Add Chapter
+            </UButton>
+
+            <UButton @click="navigateTo(`/admin/editManga/${route.params.id}`)" v-if="isAdmin" color="neutral"
+              variant="subtle" icon="i-lucide-square-pen" size="xl">
+              Edit
             </UButton>
           </ClientOnly>
         </div>
@@ -82,7 +87,6 @@
               }}</span>
           </span>
         </div>
-
       </div>
     </div>
 
@@ -225,6 +229,37 @@ async function addBookmark() {
   }
 }
 
+async function removeBookmark() {
+  try {
+    if (!mangaDetails.value || !userId) {
+      toast.add({
+        title: 'Error',
+        description: 'Not Logged In.',
+        color: 'error',
+        duration: 5000
+      });
+      return;
+    }
+    await $fetch(`/api/user/${userId}/bookmarks/${mangaDetails.value.id}`, {
+      method: 'DELETE'
+    });
+    isBookmarked.value = false;
+    toast.add({
+      title: 'Success',
+      description: 'Bookmark removed successfully.',
+      color: 'success',
+      duration: 5000
+    });
+  } catch (error) {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to remove bookmark.',
+      color: 'error',
+      duration: 5000
+    });
+  }
+}
+
 async function fetchIsBookmarked() {
   if (!userId) {
     return false;
@@ -233,7 +268,7 @@ async function fetchIsBookmarked() {
     await $fetch(`/api/user/${userId}/bookmarks/${manga_id}`);
     isBookmarked.value = true;
   } catch (error) {
-    console.error('Error checking bookmark:', error);
+    // console.error('Error checking bookmark:', error);
     return isBookmarked.value = false;
   }
 }
@@ -244,7 +279,19 @@ async function addMangaView() {
       method: 'POST'
     });
   } catch (error) {
-    
+
+  }
+}
+
+const readNow = ref(0);
+async function lastReadFunction() {
+  try {
+    await $fetch(`/api/manga/${manga_id}/chapter/${lastRead.value}`, {
+      method: 'GET'
+    })
+    readNow.value = lastRead.value + 1;
+  } catch (error) {
+    readNow.value = lastRead.value;
   }
 }
 
@@ -268,6 +315,7 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
+  lastReadFunction();
   addMangaView();
   fetchIsBookmarked();
   lastRead.value = lastReadStore.getLastRead(parseInt(manga_id));

@@ -1,14 +1,14 @@
 <template>
   <nav class="flex flex-row justify-between items-center container py-5">
-    <NuxtLink to="/" class="font-bold text-2xl">Alterkai</NuxtLink>
+    <NuxtLink to="/" class="font-[Boldonse] text-xl flex flex-col items-end">Alterkai<span
+        class="text-xs">Scans</span></NuxtLink>
+      
 
     <div class="flex items-center gap-4">
-
       <!-- SEARCH BUTTON -->
       <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center' }">
         <!-- BUTTON -->
-        <UButton icon="i-lucide-search" color="neutral" variant="outline"
-          class="md:min-w-[10rem]">
+        <UButton icon="i-lucide-search" color="neutral" variant="outline" class="md:min-w-[10rem]">
           <span class="hidden md:inline">Search...</span>
         </UButton>
 

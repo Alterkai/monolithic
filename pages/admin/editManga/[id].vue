@@ -85,7 +85,7 @@ if (manga_id) {
     description: string;
     author: string;
     ratings: number;
-    genre: string[]; // assuming genre is an array
+    genre: string[];
     cover: string;
   }
 
@@ -141,7 +141,7 @@ const onSubmit = async () => {
       };
     }
 
-    const response = await $fetch<MangaResponse>('/api/manga', {
+    const response = await $fetch<MangaResponse>(`/api/manga/${manga_id}`, {
       method: 'PATCH',
       body: formData,
     });
