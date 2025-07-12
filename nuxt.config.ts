@@ -21,8 +21,12 @@ export default defineNuxtConfig({
     alias: {
       cdn2: 'https://cdn2.alterkaiscans.my.id',
     },
-    quality: 75,
-    format: ['webp']
+    quality: 100,
+    providers: {
+      ipx: {
+        enabled: false,
+      }
+    }
   },
   fonts: {
     families: [
