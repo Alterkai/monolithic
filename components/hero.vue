@@ -19,9 +19,9 @@
                 {{ item.manga_title }}
               </h1>
               <div class="flex flex-row flex-wrap gap-2 mt-3 max-h-[1.5rem] overflow-hidden">
-                <div v-for="genre in item.genres" :key="genre.id"
+                <div v-for="genre in item.manga_genres"
                   class="text-white bg-white/20 px-2 py-1 text-xs rounded">
-                  {{ capitalizeEachWord(genre.name) }}
+                  {{ capitalizeEachWord(genre.genre_name) }}
                 </div>
               </div>
             </div>
@@ -30,8 +30,8 @@
             <div
               class="bg-primary p-4 md:p-6 text-slate-950 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-between w-full md:w-auto">
               <div class="text-center max-md:text-left">
-                <p class="font-bold text-2xl md:text-3xl">#{{ item.chapter_number !== null ?
-                  parseInt(item.chapter_number.toString()) : 0 }}</p>
+                <p class="font-bold text-2xl md:text-3xl">#{{ item.chapter_id !== null ?
+                  parseInt(item.chapter_id.toString()) : 0 }}</p>
                 <p class="text-xs font-semibold uppercase">Latest Chapter</p>
               </div>
               <NuxtLink :to="`/manga/${item.manga_id}`" class="ml-4">
@@ -50,18 +50,10 @@
 
 <script setup lang="ts">
 import { capitalizeEachWord } from '~/utils/capitalizeEachWord';
-interface Genre {
-  id: number;
-  name: string;
-}
+import type { Manga } from '~/types/manga';
 
-interface CarouselItem {
-  manga_id: number;
-  manga_title: string;
-  manga_description: string;
-  manga_cover: string;
-  chapter_number: number;
-  genres: Genre[];
+interface CarouselItem extends Manga {
+  chapter_id: number;
 }
 
 defineProps<{

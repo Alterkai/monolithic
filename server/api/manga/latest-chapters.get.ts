@@ -16,5 +16,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return result.rows;
+  return result.rows.map((m) => ({
+    manga_id: m.manga_id,
+    manga_title: m.manga_title,
+    manga_cover: m.manga_cover,
+    chapter_id: m.chapter_number,
+    chapter_date_added: m.chapter_date_added,
+  }));
 });

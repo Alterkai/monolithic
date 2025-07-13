@@ -24,7 +24,7 @@
     <!-- Chapter Information -->
     <div class="p-2 flex-grow">
       <p class="font-semibold text-sm truncate">
-        Ch. {{ parseInt(data.chapter_number) ? parseInt(data.chapter_number) : 0 }}
+        Ch. {{ parseInt(data.chapter_id) ? parseInt(data.chapter_id) : 0 }}
       </p>
       <p class="text-xs">
         {{ timeAgo(data.chapter_date_added) ? timeAgo(data.chapter_date_added) : 'Unknown Date' }}
@@ -44,10 +44,9 @@ defineProps({
       manga_id: 0,
       manga_title: 'Manga Title Placeholder',
       manga_cover: 'https://placehold.co/600x850/333/EEE/png?text=No+Cover',
-      chapter_number: 0,
+      chapter_id: 0,
       chapter_name: 'Latest Chapter',
       chapter_date_added: new Date(),
-      views: 0,
     })
   },
   isUp: {
@@ -56,5 +55,3 @@ defineProps({
   }
 })
 </script>
-
-<style scoped></style>

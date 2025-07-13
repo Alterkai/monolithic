@@ -40,8 +40,8 @@
         <!-- PERBAIKAN: Gunakan grid untuk layout yang lebih baik -->
         <div v-if="userID" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
           <!-- PERBAIKAN: Loop melalui data yang sudah dipetakan -->
-          <div v-for="bookmark in userBookmarks" :key="bookmark.id">
-            <MangaCardHome :data="bookmark" isUp="false" />
+          <div v-if="userBookmarks" v-for="bookmark in userBookmarks">
+            <MangacardHome :data="bookmark" :isUp=false />
           </div>
         </div>
 
@@ -74,11 +74,6 @@ interface UserDetail {
   date_joined: Date;
 }
 
-interface Response {
-  success: boolean;
-  user: UserDetail;
-}
-
 interface UserBookmark {
   last_read_chapter: number;
   date_added: Date;
@@ -88,16 +83,9 @@ interface UserBookmark {
   manga_cover: string;
 }
 
-// PERBAIKAN: Tipe data untuk komponen Card
-interface MangaCardData {
-  id: number;
-  title: string;
-  cover: string;
-}
-
 let userDetails = ref<UserDetail | null>(null);
 // PERBAIKAN: State ini akan menampung data yang sudah di-transformasi
-let userBookmarks = ref<MangaCardData[]>([]);
+let userBookmarks = ref<UserBookmark[]>([]);
 const route = useRoute();
 const userID = route.params.id as string;
 
@@ -118,16 +106,11 @@ async function fetchUserData() {
       throw new Error("User details not found.");
     }
 
-    // Proses dan petakan (map) data bookmark
-    if (bookmarksResponse) {
-      userBookmarks.value = bookmarksResponse.map(bookmark => ({
-        id: bookmark.manga_id,
-        title: bookmark.manga_title,
-        cover: bookmark.manga_cover,
-      }));
-    }
+    // Assign bookmark data
+    if (bookmarksResponse) userBookmarks.value = bookmarksResponse
 
   } catch (error: any) {
+    console.error(error)
     toast.add({
       title: 'Error',
       description: 'Failed to fetch user data.',

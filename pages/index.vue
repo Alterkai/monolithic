@@ -43,20 +43,17 @@
 </template>
 
 <script setup lang="ts">
+import type { Manga } from '~/types/manga';
+
 const toast = useToast();
 
-interface LatestManga {
-  manga_id: number;
-  manga_title: string;
-  manga_cover: string;
-  chapter_number: number;
-  chapter_name: string;
-  chapter_date_added: Date;
+interface HeroData extends Manga {
+  chapter_id: number;
 }
 
 interface HomePageData {
-  latestManga: LatestManga[];
-  dailyHighlights: any[];
+  latestManga: Manga[];
+  dailyHighlights: HeroData[];
 }
 
 const { data, pending, error } = await useAsyncData<HomePageData>(
@@ -64,8 +61,8 @@ const { data, pending, error } = await useAsyncData<HomePageData>(
   async () => {
     // Fetch both endpoints concurrently for better performance
     const [latestManga, dailyHighlights] = await Promise.all([
-      $fetch<LatestManga[]>('/api/manga/latest-chapters'),
-      $fetch<LatestManga[]>('/api/manga/daily-highlights')
+      $fetch<Manga[]>('/api/manga/latest-chapters'),
+      $fetch<HeroData[]>('/api/manga/daily-highlights')
     ]);
     return { latestManga, dailyHighlights };
   }
