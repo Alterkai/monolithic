@@ -4,7 +4,7 @@
     <!-- Manga Cover Wrapper -->
     <div class="relative w-full aspect-[2/3] overflow-hidden">
       <!-- Update Badge -->
-      <div class="absolute top-0 left-0 bg-red-500 text-white text-xs px-2 py-1 z-10 rounded-br-md font-bold uppercase">
+      <div v-if="isUp" class="absolute top-0 left-0 bg-red-500 text-white text-xs px-2 py-1 z-10 rounded-br-md font-bold uppercase">
         UP
       </div>
 
@@ -49,6 +49,10 @@ defineProps({
       chapter_date_added: new Date(),
       views: 0,
     })
+  },
+  isUp: {
+    type: Boolean,
+    default: true
   }
 })
 </script>

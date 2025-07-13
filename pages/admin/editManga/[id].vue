@@ -54,7 +54,7 @@
         </div>
 
         <div class="flex">
-          <UButton loading-auto type="submit" class="mt-4 flex">Add Manga</UButton>
+          <UButton loading-auto type="submit" class="mt-4 flex">Commit Changes</UButton>
         </div>
       </UForm>
     </div>

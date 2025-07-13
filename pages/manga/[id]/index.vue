@@ -22,11 +22,11 @@
     <div v-else-if="error">
       <p>Could not load manga details. Please try again later.</p>
     </div>
-    <div v-else-if="mangaDetails" class="flex flex-col min-md:flex-row gap-5">
+    <div v-else-if="mangaDetails" class="flex w-full flex-col min-md:flex-row gap-5">
       <!-- Cover -->
       <NuxtImg :src="mangaDetails.cover" class="min-md:h-[20rem]" style="width: auto" />
       <!-- Content -->
-      <div class="flex flex-col gap-2">
+      <div class="flex w-full flex-col gap-2">
         <h1 class="font-bold text-3xl">{{ mangaDetails.title }}</h1>
         <h2 class="text-lg">{{ mangaDetails.original_title }}</h2>
 
@@ -79,8 +79,8 @@
         </div>
 
         <!-- GENRES -->
-        <div class="flex flex-row gap-2 mt-4">
-          <span v-for="genre in mangaDetails.genre" class="font-semibold text-sm">
+        <div class="h-auto gap-y-2 flex flex-row flex-wrap mt-4">
+          <span v-for="genre in mangaDetails.genre" class="p-1 h-auto font-semibold text-sm">
             <span v-if="genre == 'yuri' || genre == 'smut'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
               capitalizeEachWord(genre) }}</span>
             <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre)

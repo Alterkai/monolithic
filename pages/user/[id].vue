@@ -6,7 +6,7 @@
         <div class="flex flex-col gap-2">
           <USkeleton class="h-[30px] w-[200px]" />
           <USkeleton class="h-[20px] w-[150px]" />
-          <USkeleton class="h-[20px] w-[200px]"/>
+          <USkeleton class="h-[20px] w-[200px]" />
           <div class="flex flex-wrap gap-2">
             <USkeleton width="80px" height="20px" v-for="i in 3" :key="i" />
           </div>
@@ -37,10 +37,11 @@
       <!-- BOOKMARKS -->
       <div>
         <h1 class="font-bold text-xl">Bookmarks</h1>
-        <div v-if="userID">
-          <div v-for="bookmark in userBookmarks">
-            <!-- TODO: implement manga card -->
-            <MangacardBookmark :data="bookmark" />
+        <!-- PERBAIKAN: Gunakan grid untuk layout yang lebih baik -->
+        <div v-if="userID" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+          <!-- PERBAIKAN: Loop melalui data yang sudah dipetakan -->
+          <div v-for="bookmark in userBookmarks" :key="bookmark.id">
+            <MangaCardHome :data="bookmark" isUp="false" />
           </div>
         </div>
 
@@ -56,7 +57,7 @@
 <script setup lang="ts">
 
 const toast = useToast();
-const isLoading = ref(false);
+const isLoading = ref(true); // Mulai dengan true karena kita akan fetch di onMounted
 
 interface Roles {
   id: number,
@@ -79,7 +80,6 @@ interface Response {
 }
 
 interface UserBookmark {
-  id: number;
   last_read_chapter: number;
   date_added: Date;
   user_id: number;
@@ -88,27 +88,49 @@ interface UserBookmark {
   manga_cover: string;
 }
 
+// PERBAIKAN: Tipe data untuk komponen Card
+interface MangaCardData {
+  id: number;
+  title: string;
+  cover: string;
+}
+
 let userDetails = ref<UserDetail | null>(null);
-let userBookmarks = ref<UserBookmark[]>([]);
+// PERBAIKAN: State ini akan menampung data yang sudah di-transformasi
+let userBookmarks = ref<MangaCardData[]>([]);
 const route = useRoute();
 const userID = route.params.id as string;
 
-async function fetchUserDetail() {
+// PERBAIKAN: Gabungkan kedua fetch ke dalam satu fungsi
+async function fetchUserData() {
+  isLoading.value = true;
   try {
-    isLoading.value = true;
-    const result = await $fetch<Response>(`/api/user/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    console.log('User details fetched:', result);
-    userDetails.value = result.user;
-    fetchUserBookmarks();
-  } catch (error) {
+    // Jalankan kedua fetch secara paralel untuk performa yang lebih baik
+    const [detailsResponse, bookmarksResponse] = await Promise.all([
+      $fetch<{ success: boolean; user: UserDetail }>(`/api/user/${userID}`),
+      $fetch<UserBookmark[]>(`/api/user/${userID}/bookmarks`)
+    ]);
+
+    // Proses detail user
+    if (detailsResponse && detailsResponse.user) {
+      userDetails.value = detailsResponse.user;
+    } else {
+      throw new Error("User details not found.");
+    }
+
+    // Proses dan petakan (map) data bookmark
+    if (bookmarksResponse) {
+      userBookmarks.value = bookmarksResponse.map(bookmark => ({
+        id: bookmark.manga_id,
+        title: bookmark.manga_title,
+        cover: bookmark.manga_cover,
+      }));
+    }
+
+  } catch (error: any) {
     toast.add({
       title: 'Error',
-      description: 'Failed to fetch user details.',
+      description: 'Failed to fetch user data.',
       color: 'error',
       duration: 5000
     });
@@ -117,28 +139,7 @@ async function fetchUserDetail() {
   }
 }
 
-async function fetchUserBookmarks() {
-  try {
-    isLoading.value = true;
-    const result = await $fetch<UserBookmark[]>(`/api/user/${userID}/bookmarks`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    userBookmarks.value = result;
-  } catch (error) {
-    console.error('Error fetching user bookmarks:', error);
-    toast.add({
-      title: 'Error',
-      description: 'Failed to fetch user bookmarks.',
-      color: 'error',
-      duration: 5000
-    });
-  }
-}
-
 onMounted(() => {
-  fetchUserDetail();
+  fetchUserData();
 });
 </script>
