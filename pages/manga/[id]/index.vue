@@ -79,7 +79,7 @@
         </div>
 
         <!-- GENRES -->
-        <div class="h-auto gap-y-2 flex flex-row flex-wrap mt-4">
+        <div class="h-auto gap-y-2 flex flex-row flex-wrap mt-4 min-xl:max-w-[70%]">
           <span v-for="genre in mangaDetails.manga_genres" class="p-1 h-auto font-semibold text-sm">
             <span v-if="genre.genre_name == 'yuri' || genre.genre_name == 'smut'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
               capitalizeEachWord(genre.genre_name) }}</span>

@@ -15,13 +15,13 @@
       <div class="my-4">
         <NuxtLink class="text-2xl font-bold" :to="`/manga/${mangaID}`">{{ chapterData.title }}</NuxtLink>
         <p class="text-sm font-current/60">{{ `Chapter ${parseInt(chapterData.chapter.toString())}` }}</p>
-        <UButton class="mt-2" variant="subtle" @click="isLongstrip = !isLongstrip">{{ isLongstrip ? "Horizontal View" :
+        <UButton class="mt-2" variant="subtle" @click="userPreferenceStore.toggleViewMode()">{{ userPreferenceStore.getViewMode ? "Horizontal View" :
           "Vertical View"}}</UButton>
       </div>
 
       <!-- Render Images -->
       <div class="flex flex-col items-center">
-        <ViewerVertical v-if="isLongstrip" :data="chapterData.images" />
+        <ViewerVertical v-if="userPreferenceStore.getViewMode" :data="chapterData.images" />
         <ViewerHorizontal v-else :data="chapterData.images" />
       </div>
 
@@ -50,12 +50,14 @@
 </template>
 
 <script setup lang="ts">
+import { useUserPreference } from '~/stores/userPreference';
+
 const toast = useToast();
 const route = useRoute();
 const mangaID = route.params.id as string;
 const chapterID = route.params.chapterID as string;
-const isLongstrip = ref(true);
 const lastReadStore = useLastReadStore();
+const userPreferenceStore = useUserPreference();
 
 const isNavVisible = ref(false);
 const lastScrollY = ref(0);

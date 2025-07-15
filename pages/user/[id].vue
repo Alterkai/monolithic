@@ -37,9 +37,7 @@
       <!-- BOOKMARKS -->
       <div>
         <h1 class="font-bold text-xl">Bookmarks</h1>
-        <!-- PERBAIKAN: Gunakan grid untuk layout yang lebih baik -->
         <div v-if="userID" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-          <!-- PERBAIKAN: Loop melalui data yang sudah dipetakan -->
           <div v-if="userBookmarks" v-for="bookmark in userBookmarks">
             <MangacardHome :data="bookmark" :isUp=false />
           </div>
@@ -57,7 +55,7 @@
 <script setup lang="ts">
 
 const toast = useToast();
-const isLoading = ref(true); // Mulai dengan true karena kita akan fetch di onMounted
+const isLoading = ref(true);
 
 interface Roles {
   id: number,
@@ -84,16 +82,13 @@ interface UserBookmark {
 }
 
 let userDetails = ref<UserDetail | null>(null);
-// PERBAIKAN: State ini akan menampung data yang sudah di-transformasi
 let userBookmarks = ref<UserBookmark[]>([]);
 const route = useRoute();
 const userID = route.params.id as string;
 
-// PERBAIKAN: Gabungkan kedua fetch ke dalam satu fungsi
 async function fetchUserData() {
   isLoading.value = true;
   try {
-    // Jalankan kedua fetch secara paralel untuk performa yang lebih baik
     const [detailsResponse, bookmarksResponse] = await Promise.all([
       $fetch<{ success: boolean; user: UserDetail }>(`/api/user/${userID}`),
       $fetch<UserBookmark[]>(`/api/user/${userID}/bookmarks`)
