@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col gap-2 bg-accented h-[20rem]">
+  <div class="flex flex-col gap-2 bg-accented h-[25rem]">
 
-    <!-- TEXTBOX -->
-    <div class="p-3 flex flex-col flex-shrink-0 w-full">
+    <!-- COMMENT INPUT -->
+    <div class="p-3 flex-shrink-0 w-full">
       <div v-if="isLoggedIn == true" class="flex flex-col w-full items-end gap-2">
         <UTextarea class="flex-1 w-full" v-model="newComment" placeholder="Add a comment..." />
         <UButton @click="submitComment">Submit</UButton>
@@ -13,23 +13,34 @@
       </div>
     </div>
 
+    <USeparator class="h-1 opacity-50 px-[2rem]" color="primary" />
 
-    <div v-if="pending">
-      <p>Loading comments...</p>
-    </div>
-
-    <!-- COMMENTS -->
-    <div v-else v-if="comments" v-for="data in comments" :key="data.id" class="p-3 flex items-start gap-2">
-      <UAvatar size="2xl" :src="data.user_avatar" />
-      <div class="flex flex-col">
-        <p class="text-sm text-current/80">@{{ data.username }}</p>
-        <p class="text-xs text-current/50 mb-1">{{ new Date(data.date_added).toLocaleDateString() }}</p>
-        <p>{{ data.comment }}</p>
+    <!-- COMMENTS CONTAINER -->
+    <div class="overflow-y-auto flex-1">
+      <div v-if="pending">
+        <p>Loading comments...</p>
       </div>
-    </div>
 
-    <div v-if="!comments || comments.length === 0" class="p-3 text-center text-current/50">
-      No comments yet. Be the first to comment!
+      <div v-else v-if="comments" v-for="data in comments" :key="data.id"
+        class="p-3 flex items-start justify-between gap-2">
+        <div class="flex items-start gap-2 flex-1">
+          <UAvatar size="2xl" :src="data.user_avatar" icon="i-lucide-circle-user-round"
+            class="outline outline-old-neutral-500 rounded-xl overflow-hidden" />
+          <div class="flex flex-col">
+            <p class="text-md text-current font-semibold">{{ data.username }}</p>
+            <p class="text-xs text-current/50 mb-1">{{ new Date(data.date_added).toLocaleDateString() }}</p>
+            <p>{{ data.comment }}</p>
+          </div>
+        </div>
+
+        <!-- Delete Button -->
+        <UButton v-if="user?.id === data.user_id.toString()" icon="i-lucide-trash" variant="ghost" color="neutral" size="sm"
+          @click="deleteComment(data.id)" />
+      </div>
+
+      <div v-if="!comments || comments.length === 0" class="p-3 text-center text-current/50">
+        No comments yet. Be the first to comment!
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +50,7 @@ import { useAuthStore } from '~/stores/auth';
 
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
+const user = computed(() => authStore.user);
 const isLoading = ref(false);
 const toast = useToast();
 const props = defineProps({
@@ -115,7 +127,7 @@ async function submitComment() {
     newComment.value = '';
     // Fetch updated comments
     await refresh();
-    
+
     toast.add({
       title: 'Success',
       description: 'Comment added successfully.',
@@ -131,6 +143,43 @@ async function submitComment() {
     });
   } finally {
     isLoading.value = false;
+  }
+}
+
+// Delete Comment function
+async function deleteComment(commentId: number) {
+  if (!isLoggedIn.value) {
+    toast.add({
+      title: 'Error',
+      description: 'You must be logged in to delete comments.',
+      color: 'error',
+      duration: 3000
+    });
+    return;
+  }
+
+  try {
+    await $fetch(`/api/manga/${manga_id}/${chapter_id ? chapter_id + '/' : ''}comments/${commentId}`, {
+      method: 'DELETE'
+    });
+
+    // Refresh comments after deletion
+    await refresh();
+
+    toast.add({
+      title: 'Success',
+      description: 'Comment deleted successfully.',
+      color: 'success',
+      duration: 3000
+    });
+  } catch (error) {
+    console.error('Failed to delete comment:', error);
+    toast.add({
+      title: 'Error',
+      description: 'Failed to delete comment.',
+      color: 'error',
+      duration: 5000
+    });
   }
 }
 

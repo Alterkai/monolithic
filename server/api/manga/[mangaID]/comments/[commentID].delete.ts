@@ -3,8 +3,8 @@
  * @description Deletes a specific comment. This endpoint requires the user to be authenticated.
  * A user can only delete their own comments.
  *
+ * @param {string} commentID - The ID of the comment to delete.
  * @param {string} mangaID - The ID of the manga (used for URL structure, not in logic).
- * @param {string} chapterID - The ID of the chapter (used for URL structure, not in logic).
  *
  * @body {{ commentId: number }} - The request body must be a JSON object containing the ID of the comment to be deleted.
  *
@@ -48,11 +48,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 2. Read comment ID from request body
-  const body = await readBody(event);
-  const { commentId } = body;
+  // 2. Read comment ID from params
+  let commentID = getRouterParam(event, 'commentID')
 
-  if (!commentId) {
+  if (!commentID) {
     throw createError({
       statusCode: 400,
       message: "Comment ID is required in the request body.",
@@ -62,9 +61,9 @@ export default defineEventHandler(async (event) => {
   // 3. Delete from database, ensuring the user owns the comment
   try {
     const result = await db.query(
-      `DELETE FROM chapter_comments
+      `DELETE FROM manga_comments
        WHERE id = $1 AND user_ID = $2`,
-      [commentId, userID]
+      [commentID, userID]
     );
 
     // Check if any row was actually deleted

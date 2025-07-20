@@ -117,7 +117,7 @@
 
     <!-- COMMENTS -->
     <p class="text-xl font-semibold mt-5">Comments</p>
-    <div class="max-h-[20rem] overflow-y-scroll rounded-md">
+    <div class="rounded-md">
       <CommentsContainer :manga_id="manga_id" />
     </div>
   </div>
