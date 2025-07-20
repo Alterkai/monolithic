@@ -1,9 +1,9 @@
 <template>
-  <nav class="flex flex-row justify-between items-center container py-5">
-    <NuxtLink to="/" class="font-[Boldonse] text-xl flex flex-col items-end">Alterkai<span
+  <nav class="flex flex-row justify-between  items-center container py-5">
+    <NuxtLink to="/" class=" font-[Boldonse] text-xl flex flex-col items-end">Alterkai<span
         class="text-xs">Scans</span></NuxtLink>
       
-
+    <!-- TOP NAVBAR -->
     <div class="flex items-center gap-4">
       <!-- SEARCH BUTTON -->
       <UModal v-model:open="modalOpen" :ui="{ wrapper: 'flex items-start justify-center' }">

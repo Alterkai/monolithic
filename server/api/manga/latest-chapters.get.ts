@@ -1,10 +1,11 @@
 import { db } from "~/server/utils/db";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async () => {
   const result = await db.query(
     `
     SELECT manga_id, manga_title, manga_cover, chapter_number, chapter_name, chapter_date_added
     FROM manga_latest_chapters
+    WHERE chapter_number IS NOT NULL
     ORDER BY chapter_date_added DESC
     LIMIT 20`
   );

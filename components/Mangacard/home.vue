@@ -27,7 +27,7 @@
         Ch. {{ parseInt(data.chapter_id) ? parseInt(data.chapter_id) : 0 }}
       </p>
       <p class="text-xs">
-        {{ timeAgo(data.chapter_date_added) ? timeAgo(data.chapter_date_added) : 'Unknown Date' }}
+        {{ timeAgo(data.chapter_date_added) ? timeAgo(data.chapter_date_added) : 'Unknown' }}
       </p>
     </div>
   </div>
