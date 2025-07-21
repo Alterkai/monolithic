@@ -66,8 +66,7 @@ Start the server
 - Comments (Basics)
 
 ### Yet to be implemented
-- Switching image CDN [Soon]
-- Local History (UI Implementation of Lastread) [Soon]
+- Comments [Soon]
 - Tasks Assignment for Scanlation Staff [Soon]
 - Salary Tracking for Scanlation Staff [Soon]
 - Popularity Algorithm [Soon]
