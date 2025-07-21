@@ -64,11 +64,17 @@ Start the server
 - Manga and Chapter view trackers using Redis + PgSQL
 - Daily Highlights for home (random title, reset daily)
 - Comments (Basics)
+- Comments (Basics)
 
 ### Yet to be implemented
-- Comments [Soon]
+- Switching image CDN [Soon]
+- Local History (UI Implementation of Lastread) [Soon]
+- Local History (UI Implementation of Lastread) [Soon]
 - Tasks Assignment for Scanlation Staff [Soon]
 - Salary Tracking for Scanlation Staff [Soon]
+- Popularity Algorithm [Soon]
+- SQL seeds [Soon]
+
 - Popularity Algorithm [Soon]
 - SQL seeds [Soon]
 
