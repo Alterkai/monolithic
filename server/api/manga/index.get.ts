@@ -19,7 +19,15 @@ export default defineEventHandler(async (event) => {
       FROM manga
       LIMIT 30`
     );
-    manga = result.rows;
+    manga = result.rows.map((m) => ({
+      manga_id: m.id,
+      manga_title: m.title,
+      manga_original_title: m.original_title,
+      manga_description: m.description,
+      manga_author: m.author,
+      manga_cover: m.cover,
+      manga_ratings: m.ratings,
+    }));
     return manga;
   }
   // Retrieve manga by ID
@@ -37,7 +45,15 @@ export default defineEventHandler(async (event) => {
         message: "Manga not found",
       });
     }
-    manga = result.rows;
+    manga = result.rows.map((m) => ({
+      manga_id: m.id,
+      manga_title: m.title,
+      manga_original_title: m.original_title,
+      manga_description: m.description,
+      manga_author: m.author,
+      manga_cover: m.cover,
+      manga_ratings: m.ratings,
+    }));
     return manga[0];
   } else if (title && title != "undefined") {
     const result = await db.query(
