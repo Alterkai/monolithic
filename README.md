@@ -1,7 +1,7 @@
 
 # Monolithic
 
-A Fullstack manga reading website, full with features. A Predecessor to [alterkai-website](https://github.com/Alterkai/alterkai-website), hence why it's called Alterkai v2 (Codename: Monolithic). Powered by Nuxt 3, PostgreSQL, and Redis.
+A Fullstack manga reading website, full with features. A Successor to [alterkai-website](https://github.com/Alterkai/alterkai-website), hence why it's called Alterkai v2 (Codename: Monolithic). Powered by Nuxt 3, PostgreSQL, and Redis.
 
 ## Development
 
@@ -59,11 +59,15 @@ Start the server
 - Azure Blob Storage as CDN/Image storage
 - Manga and Chapter view trackers using Redis + PgSQL
 - Daily Highlights for home (random title, reset daily)
+- Comments (Basics)
 
 ### Yet to be implemented
-- Comments [Soon]
+- Local History (UI Implementation of Lastread) [Soon]
 - Tasks Assignment for Scanlation Staff [Soon]
 - Salary Tracking for Scanlation Staff [Soon]
+- Popularity Algorithm [Soon]
+- SQL seeds [Soon]
+
 ## Authors
 
 - [@faralha](https://www.github.com/faralha)
