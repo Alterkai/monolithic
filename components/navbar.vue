@@ -22,9 +22,9 @@
             <div v-if="search.length > 0" class="mt-2">
               <p class="text-sm text-gray-500">Search results for "{{ search }}"</p>
 
-              <div v-for="result in searchResults" class="cursor-pointer" :key="result.id" @click="handleMangaClick()">
-                <Searchmangacard :title="result.title" :description="result.description" :image="result.cover"
-                  :id="result.id" />
+              <div v-for="result in searchResults" class="cursor-pointer" :key="result.manga_id" @click="handleMangaClick()">
+                <Searchmangacard :title="result.manga_title" :description="result.manga_description" :image="result.manga_cover"
+                  :id="result.manga_id" />
               </div>
             </div>
           </div>
@@ -55,10 +55,10 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import { debounce } from '~/utils/debounce'
 
 interface SearchMangaResult {
-  title: string;
-  description: string;
-  cover: string;
-  id: number;
+  manga_title: string;
+  manga_description: string;
+  manga_cover: string;
+  manga_id: number;
 }
 
 // Color mode

@@ -37,7 +37,7 @@ const items = ref([
 
 
     <!-- FOOTER -->
-    <!-- <Footer v-if="showLayout" /> -->
+    <Footer class="mt-5" v-if="showLayout" />
 
   </div>
 </template>
