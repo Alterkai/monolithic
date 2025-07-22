@@ -23,7 +23,7 @@
       <!-- Render Images -->
       <div class="flex flex-col items-center">
         <ViewerVertical v-if="userPreferenceStore.getViewMode" :data="chapterData.images" />
-        <ViewerHorizontal v-else :data="chapterData.images" />
+        <ViewerHorizontal v-else :data="chapterData.images" class="max-h-screen overflow-clip" />
       </div>
 
       <!-- Navigation Button at the Bottom -->

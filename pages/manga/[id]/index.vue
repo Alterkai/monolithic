@@ -24,7 +24,8 @@
     </div>
     <div v-else-if="mangaDetails" class="flex w-full flex-col min-md:flex-row gap-5">
       <!-- Cover -->
-      <NuxtImg :src="mangaDetails.manga_cover" class="min-md:h-[20rem]" style="width: auto" />
+      <NuxtImg :src="imageSource" :placeholder="'https://placehold.co/500x800/27272a/404040?text=Loading...'"
+        @error="handleImageError" class="min-md:h-[20rem]" style="width: auto" />
       <!-- Content -->
       <div class="flex w-full flex-col gap-2">
         <h1 class="font-bold text-3xl">{{ mangaDetails.manga_title }}</h1>
@@ -53,7 +54,8 @@
 
         <!-- ACTION BUTTONS -->
         <div class="flex flex-row gap-2 mt-2">
-          <UButton color="primary" @click="navigateTo(`/manga/${manga_id}/chapter/${readNow}`)" icon="i-lucide-book-open" size="xl">
+          <UButton color="primary" @click="navigateTo(`/manga/${manga_id}/chapter/${readNow}`)"
+            icon="i-lucide-book-open" size="xl">
             Read
           </UButton>
 
@@ -62,7 +64,8 @@
               icon="i-lucide-book-marked" size="xl">
               Bookmark
             </UButton>
-            <UButton v-else color="secondary" @click="removeBookmark()" variant="soft" icon="i-lucide-book-marked" size="xl">
+            <UButton v-else color="secondary" @click="removeBookmark()" variant="soft" icon="i-lucide-book-marked"
+              size="xl">
               Saved
             </UButton>
 
@@ -81,7 +84,8 @@
         <!-- GENRES -->
         <div class="h-auto gap-y-2 flex flex-row flex-wrap mt-4 min-xl:max-w-[70%]">
           <span v-for="genre in mangaDetails.manga_genres" class="p-1 h-auto font-semibold text-sm">
-            <span v-if="genre.genre_name == 'yuri' || genre.genre_name == 'smut'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
+            <span v-if="genre.genre_name == 'yuri' || genre.genre_name == 'smut'"
+              class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
               capitalizeEachWord(genre.genre_name) }}</span>
             <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre.genre_name)
               }}</span>
@@ -153,6 +157,22 @@ interface MangaFetchData {
 interface MangaViewsResponse {
   total_views: number;
 }
+
+// Handle cover manga placeholder
+const imageHasError = ref(false);
+const imageSource = computed(() => {
+  if (imageHasError.value || !mangaDetails.value?.manga_cover) {
+    return 'https://placehold.co/500x800/27272a/404040?text=Image+Not+Available';
+  }
+  return mangaDetails.value.manga_cover;
+});
+const handleImageError = () => {
+  imageHasError.value = true;
+};
+watch(() => manga_id, () => {
+  imageHasError.value = false; // Reset error state when changing manga
+});
+
 
 // Fetch data using useAsyncData
 const { data, pending, error } = await useAsyncData<MangaFetchData>(async () => {

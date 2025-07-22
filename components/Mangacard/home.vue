@@ -9,8 +9,8 @@
       </div>
 
       <!-- Manga Cover Image -->
-      <NuxtImg :src="data.manga_cover" placeholder="/images/covers/65601c12-d40a-441e-920a-300ae87a2448.jpg"
-        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt="Manga Cover" />
+      <NuxtImg :src="data.manga_cover"
+        class="min-w-[500px] w-full min-h-[800px] h-full object-cover transition-transform duration-300 group-hover:scale-105" alt="Manga Cover" />
 
       <!-- Title Overlay -->
       <div

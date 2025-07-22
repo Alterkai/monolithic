@@ -1,10 +1,10 @@
 <template>
-  <div v-if="data && data.length > 0" class="w-full flex flex-col items-center gap-4">
+  <div v-if="data && data.length > 0" class="w-full flex flex-col items-center gap-4 h-screen">
     <!-- Main Viewer Area -->
-    <div class="relative w-full max-w-4xl select-none">
+    <div class="relative w-full max-w-4xl flex-1 overflow-hidden select-none">
       <!-- Display the current image -->
-      <NuxtImg v-if="currentImage" :key="currentImage.id" :src="currentImage.link" class="w-full h-auto rounded-md"
-        preload :alt="`Image ${currentImage.order}`" />
+      <NuxtImg v-if="currentImage" :key="currentImage.id" :src="imageSource" class="w-full h-full object-contain rounded-md"
+        preload :alt="`Image ${currentImage.order}`" @error="handleImageError" :placeholder="'https://placehold.co/500x800/27272a/404040?text=Loading...'" />
 
       <!-- Clickable Navigation Overlays -->
       <div class="absolute top-0 left-0 h-full w-1/2 cursor-pointer" title="Previous Page" @click="previousImage"></div>
@@ -46,6 +46,21 @@ const currentIndex = ref(0);
 
 // Computed property to get the current image object
 const currentImage = computed(() => props.data[currentIndex.value]);
+
+// Handle image loading errors
+const imageHasError = ref(false);
+const imageSource = computed(() => {
+  if (imageHasError.value || !currentImage.value) {
+    return 'https://placehold.co/500x800/27272a/404040?text=Image+Not+Available';
+  }
+  return currentImage.value.link;
+});
+const handleImageError = () => {
+  imageHasError.value = true;
+};
+watch(currentImage, () => {
+  imageHasError.value = false; // Reset error state when changing images
+})
 
 // Computed properties to check if we are at the beginning or end
 const isFirstPage = computed(() => currentIndex.value === 0);
