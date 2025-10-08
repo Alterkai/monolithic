@@ -67,6 +67,8 @@
 <script setup lang="ts">
 // Import the central Manga type
 import type { Manga } from '~/types/manga';
+import apiClient from '~/utils/apiClient';
+import type { MangaResponse } from '~/types';
 
 const routeId = useRoute().params.id;
 const manga_id = Array.isArray(routeId) ? Number(routeId[0]) : Number(routeId);
@@ -89,7 +91,7 @@ const state = reactive({
 if (manga_id) {
   // Use the imported Manga type for the fetch
   const { data: mangaData } = await useAsyncData('manga-details', () =>
-    $fetch<Manga>(`/api/manga/${manga_id}`)
+    apiClient.manga.getById(manga_id)
   );
 
   // Populate state using the new property names from the API response
@@ -137,15 +139,14 @@ const onSubmit = async () => {
       formData.append('cover', state.cover);
     }
 
-    interface MangaResponse {
-      data: {
-        mangaId: number;
-      };
-    }
-
-    const response = await $fetch<MangaResponse>(`/api/manga/${manga_id}`, {
-      method: 'PATCH',
-      body: formData,
+    const response = await apiClient.manga.update(manga_id, {
+      manga_id: manga_id,
+      manga_title: state.manga_title,
+      manga_original_title: state.manga_original_title,
+      manga_description: state.manga_description,
+      manga_author: state.manga_author,
+      manga_cover: state.cover ? '' : undefined, // Handle file upload separately
+      manga_genres: [] // Parse genres if needed
     });
 
     toast.add({
@@ -155,7 +156,7 @@ const onSubmit = async () => {
       duration: 5000
     });
 
-    await navigateTo(`/manga/${response.data.mangaId}`)
+    await navigateTo(`/manga/${manga_id}`)
   } catch (error) {
     console.error('Error updating manga:', error);
     const fetchError = error as { data?: { statusMessage?: string } };

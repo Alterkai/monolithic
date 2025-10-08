@@ -86,9 +86,9 @@
           <span v-for="genre in mangaDetails.manga_genres" class="p-1 h-auto font-semibold text-sm">
             <span v-if="genre.genre_name == 'yuri' || genre.genre_name == 'smut'"
               class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
-              capitalizeEachWord(genre.genre_name) }}</span>
+                capitalizeEachWord(genre.genre_name) }}</span>
             <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre.genre_name)
-              }}</span>
+            }}</span>
           </span>
         </div>
       </div>
@@ -131,6 +131,8 @@
 import { timeAgo } from '~/utils/format'
 import { capitalizeEachWord } from '~/utils/capitalizeEachWord'
 import type { Manga, Chapter } from '~/types/manga'
+import type { MangaViewsResponse } from '~/types'
+import apiClient from '~/utils/apiClient'
 
 const authStore = useAuthStore();
 const lastReadStore = useLastReadStore();
@@ -154,10 +156,6 @@ interface MangaFetchData {
   total_views: number;
 }
 
-interface MangaViewsResponse {
-  total_views: number;
-}
-
 // Handle cover manga placeholder
 const imageHasError = ref(false);
 const imageSource = computed(() => {
@@ -177,8 +175,8 @@ watch(() => manga_id, () => {
 // Fetch data using useAsyncData
 const { data, pending, error } = await useAsyncData<MangaFetchData>(async () => {
   const [mangaDetails, mangaViews] = await Promise.all([
-    $fetch<Manga>(`/api/manga/${manga_id}`),
-    $fetch<MangaViewsResponse>(`/api/views/${manga_id}`)
+    apiClient.manga.getById(Number(manga_id)),
+    apiClient.views.getMangaViews(Number(manga_id))
   ]);
   return {
     mangaDetails,
@@ -207,13 +205,10 @@ async function addBookmark() {
       });
       return;
     }
-    await $fetch(`/api/user/${userId}/bookmarks`, {
-      method: 'POST',
-      body: {
-        manga_id: mangaDetails.value.manga_id,
-        last_read_chapter_id: lastRead.value
-      }
-    })
+    await apiClient.user.addBookmark(userId, {
+      manga_id: mangaDetails.value.manga_id,
+      last_read_chapter_id: lastRead.value
+    });
     fetchIsBookmarked();
     toast.add({
       title: 'Success',
@@ -242,9 +237,7 @@ async function removeBookmark() {
       });
       return;
     }
-    await $fetch(`/api/user/${userId}/bookmarks/${mangaDetails.value.manga_id}`, {
-      method: 'DELETE'
-    });
+    await apiClient.user.removeBookmark(userId, mangaDetails.value.manga_id);
     isBookmarked.value = false;
     toast.add({
       title: 'Success',
@@ -267,7 +260,7 @@ async function fetchIsBookmarked() {
     return false;
   }
   try {
-    await $fetch(`/api/user/${userId}/bookmarks/${manga_id}`);
+    await apiClient.user.getBookmarkByManga(userId, Number(manga_id));
     isBookmarked.value = true;
   } catch (error) {
     // console.error('Error checking bookmark:', error);
@@ -277,9 +270,7 @@ async function fetchIsBookmarked() {
 
 async function addMangaView() {
   try {
-    await $fetch(`/api/views/${manga_id}`, {
-      method: 'POST'
-    });
+    await apiClient.views.incrementMangaViews(Number(manga_id));
   } catch (error) {
 
   }
@@ -288,9 +279,7 @@ async function addMangaView() {
 const readNow = ref(0);
 async function lastReadFunction() {
   try {
-    await $fetch(`/api/manga/${manga_id}/chapter/${lastRead.value}`, {
-      method: 'GET'
-    })
+    await apiClient.chapter.get(Number(manga_id), lastRead.value);
     readNow.value = lastRead.value + 1;
   } catch (error) {
     readNow.value = lastRead.value;

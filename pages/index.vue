@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import type { Manga } from '~/types/manga';
+import apiClient from '~/utils/apiClient';
 
 const toast = useToast();
 
@@ -61,8 +62,8 @@ const { data, pending, error } = await useAsyncData<HomePageData>(
   async () => {
     // Fetch both endpoints concurrently for better performance
     const [latestManga, dailyHighlights] = await Promise.all([
-      $fetch<Manga[]>('/api/manga/latest-chapters'),
-      $fetch<HeroData[]>('/api/manga/daily-highlights')
+      apiClient.manga.getLatestChapters(),
+      apiClient.manga.getDailyHighlights()
     ]);
     return { latestManga, dailyHighlights };
   }

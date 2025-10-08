@@ -5,7 +5,7 @@
     <!-- MAIN FORM -->
     <div class="flex">
       <UForm :state="state" class="flex flex-col w-full mt-5 gap-5" @submit="onSubmit">
-        
+
         <div class="flex flex-row gap-5">
           <UFormField class="w-full" label="Title" name="title">
             <UInput placeholder="My Food Looks very Cute" class="w-full" v-model="state.title" />
@@ -55,6 +55,8 @@
 </template>
 
 <script setup lang="ts">
+import apiClient from '~/utils/apiClient';
+import type { MangaResponse } from '~/types';
 
 const isLoading = ref(false);
 const toast = useToast();
@@ -100,15 +102,13 @@ const onSubmit = async () => {
       formData.append('cover', state.cover);
     }
 
-    interface MangaResponse {
-      data: {
-        mangaId: number;
-      };
-    }
-
-    const response = await $fetch<MangaResponse>('/api/manga', {
-      method: 'POST',
-      body: formData,
+    const response = await apiClient.manga.create({
+      manga_title: state.title,
+      manga_original_title: state.original_title,
+      manga_description: state.description,
+      manga_author: state.author,
+      manga_cover: '', // Will be updated with actual URL
+      manga_genres: [] // Parse from state.genre if needed
     });
 
     console.log('Manga added successfully:', response);

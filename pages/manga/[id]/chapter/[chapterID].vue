@@ -13,25 +13,25 @@
     <!-- Content -->
     <div v-else-if="chapterData">
       <div class="my-4">
-        <NuxtLink class="text-2xl font-bold" :to="`/manga/${mangaID}`">{{ chapterData.title }}</NuxtLink>
-        <p class="text-sm font-current/60">{{ `Chapter ${parseInt(chapterData.chapter.toString())}` }}</p>
+        <NuxtLink class="text-2xl font-bold" :to="`/manga/${mangaID}`">{{ chapter?.title }}</NuxtLink>
+        <p class="text-sm font-current/60">{{ chapter ? `Chapter ${parseInt(chapter.chapter.toString())}` : '' }}</p>
         <UButton class="mt-2" variant="subtle" @click="userPreferenceStore.toggleViewMode()">{{
           userPreferenceStore.getViewMode ? "Horizontal View" :
-          "Vertical View"}}</UButton>
+            "Vertical View" }}</UButton>
       </div>
 
       <!-- Render Images -->
       <div class="flex flex-col items-center">
-        <ViewerVertical v-if="userPreferenceStore.getViewMode" :data="chapterData.images" />
-        <ViewerHorizontal v-else :data="chapterData.images" class="max-h-screen overflow-clip" />
+        <ViewerVertical v-if="userPreferenceStore.getViewMode" :data="chapter?.images || []" />
+        <ViewerHorizontal v-else :data="chapter?.images || []" class="max-h-screen overflow-clip" />
       </div>
 
       <!-- Navigation Button at the Bottom -->
       <div class="flex max-md:flex-col min-lg:flex-row gap-2 mt-4">
 
-        <NuxtLink v-if="chapterData.prevChapter"
+        <NuxtLink v-if="chapter?.prevChapter"
           class="p-2 py-4 outline outline-zinc-500 rounded-sm flex gap-2 items-center justify-end min-md:w-full min-md:flex-row-reverse"
-          :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.prevChapter.toString())}`">
+          :to="`/manga/${mangaID}/chapter/${parseInt(chapter.prevChapter.toString())}`">
           <p class="font-semibold">Prev Chapter</p>
           <UIcon name="i-lucide-arrow-left" class="size-5" />
         </NuxtLink>
@@ -43,9 +43,9 @@
           <UIcon name="i-lucide-arrow-left" class="size-5" />
         </NuxtLink>
 
-        <NuxtLink v-if="chapterData.nextChapter"
+        <NuxtLink v-if="chapter?.nextChapter"
           class="p-2 py-4 outline outline-zinc-500 rounded-sm flex gap-2 items-center justify-end min-md:w-full"
-          :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.nextChapter.toString())}`">
+          :to="`/manga/${mangaID}/chapter/${parseInt(chapter.nextChapter.toString())}`">
           <p class="font-semibold">Next Chapter</p>
           <UIcon name="i-lucide-arrow-right" class="size-5" />
         </NuxtLink>
@@ -60,14 +60,14 @@
       <Transition name="fade">
         <div v-show="isNavVisible" class="fixed bottom-5 right-5 z-50 flex gap-2">
           <!-- Tombol Previous Chapter (hanya muncul jika ada) -->
-          <NuxtLink v-if="chapterData.prevChapter"
-            :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.prevChapter.toString())}`">
+          <NuxtLink v-if="chapter?.prevChapter"
+            :to="`/manga/${mangaID}/chapter/${parseInt(chapter.prevChapter.toString())}`">
             <UButton variant="subtle" color="neutral" icon="i-lucide-arrow-left" size="lg" />
           </NuxtLink>
 
           <!-- Tombol Next Chapter (hanya muncul jika ada) -->
-          <NuxtLink v-if="chapterData.nextChapter"
-            :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.nextChapter.toString())}`">
+          <NuxtLink v-if="chapter?.nextChapter"
+            :to="`/manga/${mangaID}/chapter/${parseInt(chapter.nextChapter.toString())}`">
             <UButton variant="subtle" color="neutral" icon="i-lucide-arrow-right" size="lg" />
           </NuxtLink>
         </div>
@@ -79,6 +79,9 @@
 
 <script setup lang="ts">
 import { useUserPreference } from '~/stores/userPreference';
+import apiClient from '~/utils/apiClient';
+// Remove duplicate interface since we have it in types
+// import type { ChapterData } from '~/types';
 
 const toast = useToast();
 const route = useRoute();
@@ -110,16 +113,23 @@ interface ChapterData {
 // Fetch data using useAsyncData for SSR and client-side navigation
 const { data: chapterData, pending, error } = await useAsyncData<ChapterData>(
   `chapter-${mangaID}-${chapterID}`,
-  () => $fetch(`/api/manga/${mangaID}/${chapterID}`)
+  async () => {
+    const response = await apiClient.chapter.get(Number(mangaID), Number(chapterID));
+    if (!response.data) {
+      throw new Error('Chapter not found');
+    }
+    return response.data;
+  }
 );
+
+// Create a computed property for better type safety
+const chapter = computed(() => chapterData.value as ChapterData | null);
 
 async function addView() {
   try {
-    await $fetch(`/api/views/${mangaID}/${chapterID}`, {
-      method: 'POST',
-    });
+    await apiClient.views.incrementChapterViews(Number(mangaID), Number(chapterID));
   } catch (error) {
-    
+
   }
 }
 

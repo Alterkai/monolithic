@@ -11,7 +11,8 @@
             <h1 class="font-bold text-2xl">Add Chapter</h1>
 
             <UFormField class="w-full" label="Manga" name="manga">
-              <UInputMenu class="w-full" :items="mangaList" v-model="state.mangaID" />
+              <UInputMenu class="w-full" :items="mangaList" v-model="state.mangaID" option-attribute="label"
+                value-attribute="value" :open-on-click="true" :open-on-focus="true" />
             </UFormField>
 
             <div class="flex flex-col min-lg:flex-row w-full gap-4">
@@ -71,6 +72,8 @@
 </template>
 
 <script setup lang="ts">
+import apiClient from '~/utils/apiClient';
+import type { MangaResponse } from '~/types';
 import imageCompression from 'browser-image-compression';
 import type { Chapter, Manga } from '~/types/manga';
 
@@ -99,7 +102,7 @@ interface MangaList {
   value: number;
 }
 
-interface MangaDetails extends Manga {}
+interface MangaDetails extends Manga { }
 
 // Fetch manga details for selected manga clarity
 let mangaDetails = ref<MangaDetails | null>(null);
@@ -107,12 +110,7 @@ let latestChapterNumber = ref<number | null>(null);
 async function fetchMangaDetails(manga_id: string) {
   try {
     isLoading.value = true;
-    const response = await $fetch<MangaDetails>(`/api/manga/${manga_id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await apiClient.manga.getById(Number(manga_id));
     mangaDetails.value = response;
     latestChapterNumber.value = response.manga_chapters?.length && response.manga_chapters.length > 0
       ? response.manga_chapters[response.manga_chapters.length - 1].chapter_id
@@ -138,12 +136,7 @@ const mangaList = ref<MangaList[]>([]);
 async function fetchAllManga() {
   try {
     isLoading.value = true;
-    const response = await $fetch<MangaDetails[]>('/api/manga', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
+    const response = await apiClient.manga.getAll();
     let mangaListRaw = ref<MangaDetails[]>([]);
     mangaListRaw.value = response;
     mangaList.value = mangaListRaw.value.map(manga => ({
@@ -405,10 +398,7 @@ async function submitChapter() {
     });
 
     // 5. Send a single request to the new backend endpoint
-    await $fetch(`/api/manga/${state.mangaID.id}/upload`, {
-      method: 'POST',
-      body: formData,
-    });
+    await apiClient.manga.uploadChapter(state.mangaID.id, formData);
 
     toast.add({ title: 'Success', description: 'Chapter and images uploaded successfully!', color: 'success' });
 

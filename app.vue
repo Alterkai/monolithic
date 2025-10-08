@@ -7,14 +7,18 @@
 </template>
 
 <script setup>
+import apiClient from '~/utils/apiClient';
+
 const authStore = useAuthStore();
 
 onMounted(async () => {
   if (authStore.isLoggedIn) {
     try {
-      await $fetch('/api/auth/me', {
-        method: 'GET'
-      })
+      const response = await apiClient.auth.me();
+      // Update user info if needed
+      if (response.user) {
+        authStore.setUser(response.user);
+      }
     } catch (error) {
       authStore.logOut();
     }

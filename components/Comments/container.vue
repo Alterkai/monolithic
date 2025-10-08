@@ -34,7 +34,7 @@
         </div>
 
         <!-- Delete Button -->
-        <UButton v-if="user?.id === data.user_id.toString()" icon="i-lucide-trash" variant="ghost" color="neutral" size="sm"
+        <UButton v-if="user?.id === data.user_id" icon="i-lucide-trash" variant="ghost" color="neutral" size="sm"
           @click="deleteComment(data.id)" />
       </div>
 
@@ -47,6 +47,9 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
+import { timeAgo } from '~/utils/format';
+import apiClient from '~/utils/apiClient';
+import type { Comment } from '~/types';
 
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
@@ -68,23 +71,12 @@ const { manga_id, chapter_id } = props;
 
 const newComment = ref('');
 
-interface Comment {
-  id: number;
-  comment: string;
-  user_id: string;
-  username: string;
-  date_added: Date;
-  user_avatar: string;
-}
-
 // Fetch Comments
 const { data: comments, pending, error, refresh } = await useAsyncData<Comment[]>(
   `comments-${manga_id}-${chapter_id ?? 'manga'}`,
   () => {
-    const url = chapter_id
-      ? `/api/manga/${manga_id}/${chapter_id}/comments`
-      : `/api/manga/${manga_id}/comments`;
-    return $fetch(url);
+    return apiClient.comments.get(Number(manga_id), chapter_id || undefined)
+      .then(response => response.data || []);
   }, {
   default: () => []
 }
@@ -113,15 +105,11 @@ async function submitComment() {
 
   try {
     isLoading.value = true;
-    await $fetch(`/api/manga/${manga_id}/${chapter_id ? chapter_id + '/' : ''}comments`, {
-      method: 'POST',
-      body: {
-        comment: newComment.value
-      },
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    await apiClient.comments.create(
+      Number(manga_id),
+      { comment: newComment.value },
+      chapter_id || undefined
+    );
 
     // Clear the input field
     newComment.value = '';
@@ -159,9 +147,11 @@ async function deleteComment(commentId: number) {
   }
 
   try {
-    await $fetch(`/api/manga/${manga_id}/${chapter_id ? chapter_id + '/' : ''}comments/${commentId}`, {
-      method: 'DELETE'
-    });
+    await apiClient.comments.delete(
+      Number(manga_id),
+      commentId,
+      chapter_id || undefined
+    );
 
     // Refresh comments after deletion
     await refresh();

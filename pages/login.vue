@@ -33,20 +33,10 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import * as z from 'zod';
+import apiClient from '~/utils/apiClient';
+import type { LoginResponse } from '~/types';
 
 const redirect = useRoute().query.redirect as string | undefined;
-
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  user: {
-    id: number;
-    username: string;
-    isStaff: boolean;
-    roles: string[];
-    avatar: string;
-  };
-}
 
 const authStore = useAuthStore();
 const show = ref(false);
@@ -70,16 +60,10 @@ const state = reactive<Partial<Schema>>({
 async function onSubmit() {
   try {
     isLoading.value = true;
-    const response = await $fetch<LoginResponse>('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(state),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await apiClient.auth.login(state as { email: string, password: string });
 
     if (response && response.user) {
-      authStore.setUser({ ...response.user, id: String(response.user.id) });
+      authStore.setUser(response.user);
       if (redirect) navigateTo(redirect);
       else navigateTo('/');
     }

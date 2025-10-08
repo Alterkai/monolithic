@@ -1,18 +1,26 @@
 import { defineStore } from "pinia";
 
-export const useLastReadStore = defineStore("lastread", {
-  state: () => ({
-    lastRead: {} as Record<number, number>,
-  }),
+export const useLastReadStore = defineStore(
+  "lastread",
+  () => {
+    const lastRead = ref<Record<number, number>>({});
 
-  actions: {
-    setLastRead(mangaId: number, chapterId: number) {
-      this.lastRead[mangaId] = chapterId;
-    },
-    getLastRead(mangaId: number): number {
-      return this.lastRead[mangaId] || 1;
-    },
+    function setLastRead(mangaId: number, chapterId: number) {
+      lastRead.value[mangaId] = chapterId;
+    }
+
+    function getLastRead(mangaId: number): number {
+      return lastRead.value[mangaId] || 1;
+    }
+
+    return {
+      lastRead,
+      setLastRead,
+      getLastRead,
+    };
   },
-
-  persist: true,
-});
+  {
+    // @ts-ignore - Pinia persist plugin
+    persist: true,
+  }
+);

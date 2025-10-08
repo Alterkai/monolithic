@@ -1,8 +1,8 @@
 <template>
   <nav class="flex flex-row justify-between  items-center container py-5">
-    <NuxtLink to="/" class=" font-[Boldonse] text-xl flex flex-col items-end">Alterkai<span
-        class="text-xs">Scans</span></NuxtLink>
-      
+    <NuxtLink to="/" class=" font-[Boldonse] text-xl flex flex-col items-end">Alterkai<span class="text-xs">Scans</span>
+    </NuxtLink>
+
     <!-- TOP NAVBAR -->
     <div class="flex items-center gap-4">
       <!-- SEARCH BUTTON -->
@@ -22,9 +22,10 @@
             <div v-if="search.length > 0" class="mt-2">
               <p class="text-sm text-gray-500">Search results for "{{ search }}"</p>
 
-              <div v-for="result in searchResults" class="cursor-pointer" :key="result.manga_id" @click="handleMangaClick()">
-                <Searchmangacard :title="result.manga_title" :description="result.manga_description" :image="result.manga_cover"
-                  :id="result.manga_id" />
+              <div v-for="result in searchResults" class="cursor-pointer" :key="result.manga_id"
+                @click="handleMangaClick()">
+                <Searchmangacard :title="result.manga_title" :description="result.manga_description"
+                  :image="result.manga_cover" :id="result.manga_id" />
               </div>
             </div>
           </div>
@@ -50,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import apiClient from '~/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { debounce } from '~/utils/debounce'
@@ -131,12 +133,7 @@ const performSearch = async (query: string) => {
   }
 
   try {
-    const response = await $fetch<SearchMangaResult[]>(`/api/manga/?title=${encodeURIComponent(query)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await apiClient.manga.search(query);
     console.log('Search results:', response);
     if (response && Array.isArray(response)) {
       searchResults.value = response;

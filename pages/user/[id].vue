@@ -53,6 +53,8 @@
 </template>
 
 <script setup lang="ts">
+import apiClient from '~/utils/apiClient';
+import type { UserDetailResponse, UserBookmarksResponse } from '~/types';
 
 const toast = useToast();
 const isLoading = ref(true);
@@ -90,8 +92,8 @@ async function fetchUserData() {
   isLoading.value = true;
   try {
     const [detailsResponse, bookmarksResponse] = await Promise.all([
-      $fetch<{ success: boolean; user: UserDetail }>(`/api/user/${userID}`),
-      $fetch<UserBookmark[]>(`/api/user/${userID}/bookmarks`)
+      apiClient.user.getById(Number(userID)),
+      apiClient.user.getBookmarks(Number(userID))
     ]);
 
     // Proses detail user
@@ -102,7 +104,7 @@ async function fetchUserData() {
     }
 
     // Assign bookmark data
-    if (bookmarksResponse) userBookmarks.value = bookmarksResponse
+    if (bookmarksResponse && bookmarksResponse.data) userBookmarks.value = bookmarksResponse.data
 
   } catch (error: any) {
     console.error(error)

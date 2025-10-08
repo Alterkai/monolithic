@@ -1,25 +1,29 @@
-import { defineStore } from 'pinia';
+import { defineStore } from "pinia";
 
-export const useUserPreference = defineStore('userPreference', {
-  state: () => ({
-    // Reading View Preference
-    isLongstrip: false,
-  }),
+export const useUserPreference = defineStore(
+  "userPreference",
+  () => {
+    const isLongstrip = ref(false);
 
-  actions: {
-    setViewMode(isLongstrip: boolean) {
-      this.isLongstrip = isLongstrip;
-    },
-    toggleViewMode() {
-      this.isLongstrip = !this.isLongstrip;
+    function setViewMode(value: boolean) {
+      isLongstrip.value = value;
     }
-  },
 
-  getters: {
-    getViewMode: (state) => {
-      return state.isLongstrip;
+    function toggleViewMode() {
+      isLongstrip.value = !isLongstrip.value;
     }
+
+    const getViewMode = computed(() => isLongstrip.value);
+
+    return {
+      isLongstrip,
+      setViewMode,
+      toggleViewMode,
+      getViewMode,
+    };
   },
-  
-  persist: true,
-})
+  {
+    // @ts-ignore - Pinia persist plugin
+    persist: true,
+  }
+);

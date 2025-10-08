@@ -43,6 +43,8 @@
 
 <script setup lang="ts">
 import * as z from 'zod';
+import apiClient from '~/utils/apiClient';
+import type { RegisterRequest } from '~/types';
 
 const show = ref(false);
 const isLoading = ref(false);
@@ -94,13 +96,13 @@ const state = reactive<Partial<Schema>>({
 async function onSubmit() {
   isLoading.value = true;
   try {
-    await $fetch('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(state),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
+    await apiClient.auth.register(state as RegisterRequest);
+    toast.add({
+      title: 'Registration Successful',
+      description: 'You can now log in with your credentials.',
+      color: 'success',
+      duration: 5000
+    });
   } catch (error) {
     console.error('Registration failed:', error);
     toast.add({

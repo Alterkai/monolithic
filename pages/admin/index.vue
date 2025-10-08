@@ -34,7 +34,8 @@
     <!-- TAMBAHAN: Modal Konfirmasi Penghapusan -->
     <UModal v-model:open="isModalOpen">
       <template #header class="flex items-center">
-        <UButton icon="i-lucide-triangle-alert" variant="ghost" color="error" class="font-bold text-lg">Confirm Deletion</UButton>
+        <UButton icon="i-lucide-triangle-alert" variant="ghost" color="error" class="font-bold text-lg">Confirm Deletion
+        </UButton>
       </template>
       <template #body>
         <p>Are you sure you want to delete this manga? This action cannot be undone.</p>
@@ -51,6 +52,7 @@
 
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
+import apiClient from '~/utils/apiClient';
 
 const table = useTemplateRef('table');
 const toast = useToast();
@@ -70,7 +72,7 @@ interface MangaLatestChapter {
 // PERUBAHAN: Ambil 'refresh' dari useAsyncData untuk memperbarui tabel
 const { data, pending, error, refresh } = await useAsyncData<MangaLatestChapter[]>(
   'latestMangaChapters',
-  () => $fetch('/api/manga')
+  () => apiClient.manga.getLatestChapters()
 );
 
 const columnFilters = ref([
