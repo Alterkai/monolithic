@@ -5,11 +5,11 @@
       <h1 class="font-bold text-2xl mb-2">Login</h1>
 
       <UFormField label="Email" name="email">
-        <UInput class="w-full" v-model="state.email" type="email" />
+        <UInput size="xl" class="w-full" v-model="state.email" type="email" />
       </UFormField>
 
       <UFormField label="Password" name="password">
-        <UInput class="w-full" v-model="state.password" :type="show ? 'text' : 'password'">
+        <UInput size="xl" class="w-full" v-model="state.password" :type="show ? 'text' : 'password'">
           <template #trailing>
             <UButton color="neutral" variant="link" size="sm" :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
               :aria-label="show ? 'Hide password' : 'Show password'" :aria-pressed="show" aria-controls="password"
@@ -19,8 +19,8 @@
       </UFormField>
 
 
-      <UButton v-if="isLoading" class="mt-4 justify-center" loading>Loading</UButton>
-      <UButton v-else type="submit" class="mt-4 justify-center">Login</UButton>
+      <UButton size="xl" v-if="isLoading" class="mt-4 justify-center" loading>Loading</UButton>
+      <UButton size="xl" v-else type="submit" class="mt-4 justify-center">Login</UButton>
 
       <ULink to="/register" class="text-center text-sm" size="xl">
         Register

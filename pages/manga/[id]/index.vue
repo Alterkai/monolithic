@@ -3,7 +3,7 @@
   <div class="h-[25rem] min-lg:h-[20rem] overflow-hidden -z-10 relative">
     <USkeleton v-if="pending" class="w-full h-full" />
     <NuxtImg v-else ref="parallaxImage" class="w-full object-cover opacity-30 blur-sm select-none inset-0"
-      :src="mangaDetails?.cover" :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">
+      :src="mangaDetails?.manga_cover" :style="{ transform: `translateY(${parallaxOffset}px)` }" draggable="false">
     </NuxtImg>
   </div>
 
@@ -22,13 +22,14 @@
     <div v-else-if="error">
       <p>Could not load manga details. Please try again later.</p>
     </div>
-    <div v-else-if="mangaDetails" class="flex flex-col min-md:flex-row gap-5">
+    <div v-else-if="mangaDetails" class="flex w-full flex-col min-md:flex-row gap-5">
       <!-- Cover -->
-      <NuxtImg :src="mangaDetails.cover" class="min-md:h-[20rem]" style="width: auto" />
+      <NuxtImg :src="imageSource" :placeholder="'https://placehold.co/500x800/27272a/404040?text=Loading...'"
+        @error="handleImageError" class="min-md:h-[20rem]" style="width: auto" />
       <!-- Content -->
-      <div class="flex flex-col gap-2">
-        <h1 class="font-bold text-3xl">{{ mangaDetails.title }}</h1>
-        <h2 class="text-lg">{{ mangaDetails.original_title }}</h2>
+      <div class="flex w-full flex-col gap-2">
+        <h1 class="font-bold text-3xl">{{ mangaDetails.manga_title }}</h1>
+        <h2 class="text-lg">{{ mangaDetails.manga_original_title }}</h2>
 
         <USeparator type="solid" color="primary" />
 
@@ -41,19 +42,20 @@
 
           <div class="flex flex-row items-center gap-2">
             <UIcon name="i-lucide-star" class="size-5" />
-            <span class="text-sm">{{ mangaDetails.ratings }}</span>
+            <span class="text-sm">{{ mangaDetails.manga_ratings }}</span>
           </div>
         </div>
 
         <!-- DESCRIPTIONS -->
-        <p class="text-md text-neutral text-wrap ">{{ mangaDetails.description }}</p>
+        <p class="text-md text-neutral text-wrap ">{{ mangaDetails.manga_description }}</p>
 
         <!-- AUTHOR -->
-        <span class="text-md">Author: {{ mangaDetails.author }}</span>
+        <span class="text-md">Author: {{ mangaDetails.manga_author }}</span>
 
         <!-- ACTION BUTTONS -->
         <div class="flex flex-row gap-2 mt-2">
-          <UButton color="primary" @click="navigateTo(`/manga/${manga_id}/chapter/${readNow}`)" icon="i-lucide-book-open" size="xl">
+          <UButton color="primary" @click="navigateTo(`/manga/${manga_id}/chapter/${readNow}`)"
+            icon="i-lucide-book-open" size="xl">
             Read
           </UButton>
 
@@ -62,7 +64,8 @@
               icon="i-lucide-book-marked" size="xl">
               Bookmark
             </UButton>
-            <UButton v-else color="secondary" @click="removeBookmark()" variant="soft" icon="i-lucide-book-marked" size="xl">
+            <UButton v-else color="secondary" @click="removeBookmark()" variant="soft" icon="i-lucide-book-marked"
+              size="xl">
               Saved
             </UButton>
 
@@ -79,11 +82,12 @@
         </div>
 
         <!-- GENRES -->
-        <div class="flex flex-row gap-2 mt-4">
-          <span v-for="genre in mangaDetails.genre" class="font-semibold text-sm">
-            <span v-if="genre == 'yuri' || genre == 'smut'" class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
-              capitalizeEachWord(genre) }}</span>
-            <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre)
+        <div class="h-auto gap-y-2 flex flex-row flex-wrap mt-4 min-xl:max-w-[70%]">
+          <span v-for="genre in mangaDetails.manga_genres" class="p-1 h-auto font-semibold text-sm">
+            <span v-if="genre.genre_name == 'yuri' || genre.genre_name == 'smut'"
+              class="bg-primary p-1 px-1.5 rounded-sm text-white">{{
+              capitalizeEachWord(genre.genre_name) }}</span>
+            <span v-else class="p-1 px-1.5 outline outline-current rounded-sm">{{ capitalizeEachWord(genre.genre_name)
               }}</span>
           </span>
         </div>
@@ -93,22 +97,22 @@
     <!-- CHAPTERS -->
     <p class="text-xl font-semibold mt-5">Chapters</p>
     <div v-if="mangaDetails" class="max-h-[20rem] overflow-y-scroll flex flex-col gap-4 p-4 rounded-sm bg-accented">
-      <div v-if="mangaDetails.chapters.length === 0" class="text-center text-current/60">
+      <div v-if="mangaDetails.manga_chapters?.length === 0" class="text-center text-current/60">
         No chapters available for this manga.
       </div>
-      <div v-for="chapter in sortedChapters" :key="chapter.number" class="flex">
+      <div v-for="chapter in sortedChapters" :key="chapter.chapter_id" class="flex">
         <NuxtLink
           class="dark:hover:bg-slate-800 light:hover:bg-slate-300 outline outline-current/40 transition ease-in p-2 rounded-md font-semibold w-full"
-          :class="{ 'text-current/60 dark:text-slate-400 light:text-slate-500': chapter.number <= lastRead }"
-          :to="`/manga/${mangaDetails.id}/chapter/${chapter.number}`">
+          :class="{ 'text-current/60 dark:text-slate-400 light:text-slate-500': chapter.chapter_id <= lastRead }"
+          :to="`/manga/${mangaDetails.manga_id}/chapter/${chapter.chapter_id}`">
           <div class="flex justify-between items-center">
             <div>
-              Ch. {{ chapter.number }} {{ chapter.name ? `- ${chapter.name}` : '' }}
-              <p class="text-sm font-light">{{ timeAgo(chapter.date_added) }}</p>
+              Ch. {{ chapter.chapter_id }} {{ chapter.chapter_name ? `- ${chapter.chapter_name}` : '' }}
+              <p class="text-sm font-light">{{ timeAgo(chapter.chapter_date_added) }}</p>
             </div>
             <div class="flex items-center gap-2">
               <UIcon name="i-lucide-eye" class="size-4" />
-              {{ chapter.views }}
+              {{ chapter.chapter_views }}
             </div>
           </div>
         </NuxtLink>
@@ -117,7 +121,7 @@
 
     <!-- COMMENTS -->
     <p class="text-xl font-semibold mt-5">Comments</p>
-    <div class="max-h-[20rem] overflow-y-scroll rounded-md">
+    <div class="rounded-md">
       <CommentsContainer :manga_id="manga_id" />
     </div>
   </div>
@@ -126,6 +130,7 @@
 <script setup lang="ts">
 import { timeAgo } from '~/utils/format'
 import { capitalizeEachWord } from '~/utils/capitalizeEachWord'
+import type { Manga, Chapter } from '~/types/manga'
 
 const authStore = useAuthStore();
 const lastReadStore = useLastReadStore();
@@ -144,27 +149,8 @@ const isAdmin = computed(() => authStore.user?.roles.includes('Admin'));
 const parallaxOffset = ref(0);
 const parallaxImage = ref(null);
 
-interface Chapter {
-  number: number,
-  name: string,
-  date_added: Date,
-  views: number
-}
-
-interface MangaDetail {
-  id: number,
-  title: string,
-  original_title: string,
-  description: string,
-  cover: string,
-  ratings: number,
-  genre: string[],
-  chapters: Chapter[],
-  author: string,
-}
-
 interface MangaFetchData {
-  mangaDetails: MangaDetail;
+  mangaDetails: Manga;
   total_views: number;
 }
 
@@ -172,10 +158,26 @@ interface MangaViewsResponse {
   total_views: number;
 }
 
+// Handle cover manga placeholder
+const imageHasError = ref(false);
+const imageSource = computed(() => {
+  if (imageHasError.value || !mangaDetails.value?.manga_cover) {
+    return 'https://placehold.co/500x800/27272a/404040?text=Image+Not+Available';
+  }
+  return mangaDetails.value.manga_cover;
+});
+const handleImageError = () => {
+  imageHasError.value = true;
+};
+watch(() => manga_id, () => {
+  imageHasError.value = false; // Reset error state when changing manga
+});
+
+
 // Fetch data using useAsyncData
 const { data, pending, error } = await useAsyncData<MangaFetchData>(async () => {
   const [mangaDetails, mangaViews] = await Promise.all([
-    $fetch<MangaDetail>(`/api/manga/${manga_id}`),
+    $fetch<Manga>(`/api/manga/${manga_id}`),
     $fetch<MangaViewsResponse>(`/api/views/${manga_id}`)
   ]);
   return {
@@ -188,10 +190,10 @@ const mangaDetails = computed(() => data.value?.mangaDetails);
 const mangaViews = computed(() => data.value?.total_views);
 
 const sortedChapters = computed(() => {
-  if (!mangaDetails.value?.chapters) {
+  if (!mangaDetails.value?.manga_chapters) {
     return [];
   }
-  return [...mangaDetails.value.chapters].sort((a, b) => b.number - a.number);
+  return [...mangaDetails.value.manga_chapters].sort((a, b) => b.chapter_id - a.chapter_id);
 });
 
 async function addBookmark() {
@@ -208,7 +210,7 @@ async function addBookmark() {
     await $fetch(`/api/user/${userId}/bookmarks`, {
       method: 'POST',
       body: {
-        manga_id: mangaDetails.value.id,
+        manga_id: mangaDetails.value.manga_id,
         last_read_chapter_id: lastRead.value
       }
     })
@@ -240,7 +242,7 @@ async function removeBookmark() {
       });
       return;
     }
-    await $fetch(`/api/user/${userId}/bookmarks/${mangaDetails.value.id}`, {
+    await $fetch(`/api/user/${userId}/bookmarks/${mangaDetails.value.manga_id}`, {
       method: 'DELETE'
     });
     isBookmarked.value = false;

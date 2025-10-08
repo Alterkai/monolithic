@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+.bg-accented {
+  @apply dark:bg-zinc-800
+}
+
 .container {
   width: 100%; /* Default 100% lebar */
   padding-left: 15px; /* Padding default untuk mobile */

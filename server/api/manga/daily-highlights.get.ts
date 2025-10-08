@@ -16,5 +16,15 @@ export default defineEventHandler(async (event) => {
     return [];
   }
 
-  return result.rows;
+  return result.rows.map((dh: any) => ({
+    manga_id: dh.manga_id,
+    manga_title: dh.manga_title,
+    manga_author: dh.manga_author,
+    manga_cover: dh.manga_cover,
+    chapter_id: dh.chapter_number,
+    manga_genres: dh.genres.map((g: any) => ({
+      genre_name: g.name,
+      genre_id: g.id,
+    }))
+  }));
 });

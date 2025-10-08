@@ -12,7 +12,7 @@
     <div class="flex flex-col w-auto max-lg:w-full">
       <h2 class="font-semibold text-2xl mb-5">Latest Projects</h2>
       <div v-if="pending">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
           <div v-for="i in 10" :key="i" class="flex flex-col gap-2">
             <USkeleton class="h-[250px] w-full" />
             <USkeleton class="h-4 w-3/4" />
@@ -21,7 +21,7 @@
       </div>
 
       <div v-else-if="data?.latestManga">
-        <div class="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
+        <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[5px] gap-y-6">
           <NuxtLink v-for="manga in data.latestManga" :key="manga.manga_id" :to="`/manga/${manga.manga_id}`">
             <MangacardHome :data="manga" />
           </NuxtLink>
@@ -33,7 +33,7 @@
     </div>
 
     <!-- RIGHT SECTION -->
-    <div class="min-lg:w-[45%]">
+    <div class="min-lg:w-full">
       <h2 class="font-semibold text-2xl mb-5">Social Media</h2>
       <div>
         <Socialmedia />
@@ -43,20 +43,17 @@
 </template>
 
 <script setup lang="ts">
+import type { Manga } from '~/types/manga';
+
 const toast = useToast();
 
-interface LatestManga {
-  manga_id: number;
-  manga_title: string;
-  manga_cover: string;
-  chapter_number: number;
-  chapter_name: string;
-  chapter_date_added: Date;
+interface HeroData extends Manga {
+  chapter_id: number;
 }
 
 interface HomePageData {
-  latestManga: LatestManga[];
-  dailyHighlights: any[];
+  latestManga: Manga[];
+  dailyHighlights: HeroData[];
 }
 
 const { data, pending, error } = await useAsyncData<HomePageData>(
@@ -64,8 +61,8 @@ const { data, pending, error } = await useAsyncData<HomePageData>(
   async () => {
     // Fetch both endpoints concurrently for better performance
     const [latestManga, dailyHighlights] = await Promise.all([
-      $fetch<LatestManga[]>('/api/manga/latest-chapters'),
-      $fetch<LatestManga[]>('/api/manga/daily-highlights')
+      $fetch<Manga[]>('/api/manga/latest-chapters'),
+      $fetch<HeroData[]>('/api/manga/daily-highlights')
     ]);
     return { latestManga, dailyHighlights };
   }

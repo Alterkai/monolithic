@@ -28,20 +28,21 @@ export default defineEventHandler(async (event) => {
   manga = result.rows[0];
 
   return {
-    id: manga.manga_id,
-    title: manga.manga_title,
-    original_title: manga.manga_original_title,
-    description: manga.manga_description,
-    author: manga.manga_author,
-    cover: manga.manga_cover,
-    ratings: manga.manga_ratings,
-    genre: mangaGenre.rows.map((g: any) => g.name),
-    chapters: manga.chapters.map((chapter: any) => ({
-      id: chapter.id,
-      name: chapter.name,
-      number: chapter.number,
-      date_added: chapter.date_added,
-      views: chapter.views
+    manga_id: manga.manga_id,
+    manga_title: manga.manga_title,
+    manga_original_title: manga.manga_original_title,
+    manga_description: manga.manga_description,
+    manga_author: manga.manga_author,
+    manga_cover: manga.manga_cover,
+    manga_ratings: manga.manga_ratings,
+    manga_genres: mangaGenre.rows.map((g: any) => ({
+      genre_name: g.name
+    })),
+    manga_chapters: manga.chapters.map((chapter: any) => ({
+      chapter_id: chapter.number,
+      chapter_name: chapter.name,
+      chapter_date_added: chapter.date_added,
+      chapter_views: chapter.views
     })),
   };
 });

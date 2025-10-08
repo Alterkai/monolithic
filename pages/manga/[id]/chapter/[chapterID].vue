@@ -15,14 +15,40 @@
       <div class="my-4">
         <NuxtLink class="text-2xl font-bold" :to="`/manga/${mangaID}`">{{ chapterData.title }}</NuxtLink>
         <p class="text-sm font-current/60">{{ `Chapter ${parseInt(chapterData.chapter.toString())}` }}</p>
-        <UButton class="mt-2" variant="subtle" @click="isLongstrip = !isLongstrip">{{ isLongstrip ? "Horizontal View" :
+        <UButton class="mt-2" variant="subtle" @click="userPreferenceStore.toggleViewMode()">{{
+          userPreferenceStore.getViewMode ? "Horizontal View" :
           "Vertical View"}}</UButton>
       </div>
 
       <!-- Render Images -->
       <div class="flex flex-col items-center">
-        <ViewerVertical v-if="isLongstrip" :data="chapterData.images" />
-        <ViewerHorizontal v-else :data="chapterData.images" />
+        <ViewerVertical v-if="userPreferenceStore.getViewMode" :data="chapterData.images" />
+        <ViewerHorizontal v-else :data="chapterData.images" class="max-h-screen overflow-clip" />
+      </div>
+
+      <!-- Navigation Button at the Bottom -->
+      <div class="flex max-md:flex-col min-lg:flex-row gap-2 mt-4">
+
+        <NuxtLink v-if="chapterData.prevChapter"
+          class="p-2 py-4 outline outline-zinc-500 rounded-sm flex gap-2 items-center justify-end min-md:w-full min-md:flex-row-reverse"
+          :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.prevChapter.toString())}`">
+          <p class="font-semibold">Prev Chapter</p>
+          <UIcon name="i-lucide-arrow-left" class="size-5" />
+        </NuxtLink>
+
+        <NuxtLink v-else
+          class="p-2 py-4 outline outline-zinc-500 rounded-sm flex gap-2 items-center justify-end min-md:w-full min-md:flex-row-reverse"
+          :to="`/manga/${mangaID}`">
+          <p class="font-semibold">Manga Details</p>
+          <UIcon name="i-lucide-arrow-left" class="size-5" />
+        </NuxtLink>
+
+        <NuxtLink v-if="chapterData.nextChapter"
+          class="p-2 py-4 outline outline-zinc-500 rounded-sm flex gap-2 items-center justify-end min-md:w-full"
+          :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.nextChapter.toString())}`">
+          <p class="font-semibold">Next Chapter</p>
+          <UIcon name="i-lucide-arrow-right" class="size-5" />
+        </NuxtLink>
       </div>
 
       <div class="mt-5">
@@ -30,16 +56,18 @@
         <CommentsContainer :manga_id="mangaID" :chapter_id="parseInt(chapterID)" />
       </div>
 
-      <!-- Navigation Button -->
+      <!-- Navigation Button Popup -->
       <Transition name="fade">
         <div v-show="isNavVisible" class="fixed bottom-5 right-5 z-50 flex gap-2">
           <!-- Tombol Previous Chapter (hanya muncul jika ada) -->
-          <NuxtLink v-if="chapterData.prevChapter" :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.prevChapter.toString())}`">
+          <NuxtLink v-if="chapterData.prevChapter"
+            :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.prevChapter.toString())}`">
             <UButton variant="subtle" color="neutral" icon="i-lucide-arrow-left" size="lg" />
           </NuxtLink>
 
           <!-- Tombol Next Chapter (hanya muncul jika ada) -->
-          <NuxtLink v-if="chapterData.nextChapter" :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.nextChapter.toString())}`">
+          <NuxtLink v-if="chapterData.nextChapter"
+            :to="`/manga/${mangaID}/chapter/${parseInt(chapterData.nextChapter.toString())}`">
             <UButton variant="subtle" color="neutral" icon="i-lucide-arrow-right" size="lg" />
           </NuxtLink>
         </div>
@@ -50,12 +78,14 @@
 </template>
 
 <script setup lang="ts">
+import { useUserPreference } from '~/stores/userPreference';
+
 const toast = useToast();
 const route = useRoute();
 const mangaID = route.params.id as string;
 const chapterID = route.params.chapterID as string;
-const isLongstrip = ref(true);
 const lastReadStore = useLastReadStore();
+const userPreferenceStore = useUserPreference();
 
 const isNavVisible = ref(false);
 const lastScrollY = ref(0);

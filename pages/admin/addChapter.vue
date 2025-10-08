@@ -5,7 +5,7 @@
       <UForm :state="state" class="flex flex-col w-full mt-5 gap-5">
 
         <div class="flex flex-row w-full gap-5">
-          <NuxtImg class="w-[12rem] h-auto" :src="mangaDetails?.cover" />
+          <NuxtImg class="w-[12rem] h-auto" :src="mangaDetails?.manga_cover" />
 
           <div class="flex flex-col gap-2 justify-end w-full">
             <h1 class="font-bold text-2xl">Add Chapter</h1>
@@ -72,6 +72,7 @@
 
 <script setup lang="ts">
 import imageCompression from 'browser-image-compression';
+import type { Chapter, Manga } from '~/types/manga';
 
 const toast = useToast();
 const route = useRoute();
@@ -98,20 +99,7 @@ interface MangaList {
   value: number;
 }
 
-interface Chapter {
-  id: number;
-  name: string;
-  number: number;
-  date_added: Date;
-}
-
-interface MangaDetails {
-  id: number;
-  title: string;
-  original_title: string;
-  cover: string;
-  chapters: Chapter[];
-}
+interface MangaDetails extends Manga {}
 
 // Fetch manga details for selected manga clarity
 let mangaDetails = ref<MangaDetails | null>(null);
@@ -126,7 +114,9 @@ async function fetchMangaDetails(manga_id: string) {
       }
     });
     mangaDetails.value = response;
-    latestChapterNumber.value = response.chapters.length > 0 ? response.chapters[response.chapters.length - 1].number : 0;
+    latestChapterNumber.value = response.manga_chapters?.length && response.manga_chapters.length > 0
+      ? response.manga_chapters[response.manga_chapters.length - 1].chapter_id
+      : 0;
     state.chapterID = latestChapterNumber.value + 1; // chapterID = latest++
     return response;
   } catch (error) {
@@ -145,7 +135,6 @@ async function fetchMangaDetails(manga_id: string) {
 // Fetch all manga for the dropdown menu
 
 const mangaList = ref<MangaList[]>([]);
-const mangaValue = ref<MangaList>();
 async function fetchAllManga() {
   try {
     isLoading.value = true;
@@ -158,9 +147,9 @@ async function fetchAllManga() {
     let mangaListRaw = ref<MangaDetails[]>([]);
     mangaListRaw.value = response;
     mangaList.value = mangaListRaw.value.map(manga => ({
-      id: manga.id,
-      label: manga.title,
-      value: manga.id
+      id: manga.manga_id,
+      label: manga.manga_title,
+      value: manga.manga_id
     }));
 
     // Assign default manga dropdown state if mangaID is provided

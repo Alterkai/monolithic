@@ -18,7 +18,12 @@ export default defineEventHandler(async (event) => {
         message: "Bookmarks not found",
       });
     }
-    return result.rows;
+    return result.rows.map(b => ({
+      manga_id: b.manga_id,
+      manga_title: b.manga_title,
+      chapter_last_read: b.last_read_chapter,
+      chapter_date_added: b.date_added,
+    }));
   } catch (error) {
     console.error("Error fetching bookmarks:", error);
     throw createError({

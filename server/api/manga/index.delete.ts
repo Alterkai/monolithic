@@ -20,6 +20,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     message: "Manga deleted successfully",
-    id: result.rows[0].id,
+    manga_id: result.rows[0].id,
   };
 })

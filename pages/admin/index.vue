@@ -70,7 +70,7 @@ interface MangaLatestChapter {
 // PERUBAHAN: Ambil 'refresh' dari useAsyncData untuk memperbarui tabel
 const { data, pending, error, refresh } = await useAsyncData<MangaLatestChapter[]>(
   'latestMangaChapters',
-  () => $fetch('/api/manga/latest-chapters')
+  () => $fetch('/api/manga')
 );
 
 const columnFilters = ref([
